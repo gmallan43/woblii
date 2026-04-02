@@ -1,9 +1,9 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Steadfast</title>
+<title>Woblii</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -608,7 +608,7 @@ function bind(){
 function rLoading(){
   return`<div class="auth-screen" style="display:flex">
     <div class="auth-inner">
-      <div class="logo">Steadfast</div>
+      <div class="logo">Woblii</div>
       <div class="breathe-circle">···</div>
     </div>
   </div>`
@@ -616,7 +616,7 @@ function rLoading(){
 function rSignin(){
   return`<div class="auth-screen" style="display:flex">
     <div class="auth-inner">
-      <div class="logo">Steadfast</div>
+      <div class="logo">Woblii</div>
       <div class="display" style="margin-bottom:14px;font-size:2.2rem">Begin.</div>
       <p class="body-text" style="margin-bottom:36px;font-size:.9rem">Your companion for every kind of day.<br>Enter your email and we'll send you a link.</p>
       <input type="email" class="text-input" id="email-input" placeholder="your@email.com" style="text-align:center;font-size:.95rem" autocomplete="email">
@@ -632,14 +632,14 @@ function rSignin(){
 function rEmailSent(){
   return`<div class="auth-screen" style="display:flex">
     <div class="auth-inner">
-      <div class="logo">Steadfast</div>
+      <div class="logo">Woblii</div>
       <div class="display" style="margin-bottom:18px;font-size:2rem">Check your email.</div>
       <div class="email-status">
         <p class="muted" style="font-size:.78rem;margin-bottom:6px">We've sent a link to</p>
         <div class="email-address">${pendingEmail}</div>
-        <p class="muted" style="font-size:.75rem;margin-top:6px">Click it to open Steadfast.</p>
+        <p class="muted" style="font-size:.75rem;margin-top:6px">Click it to open Woblii.</p>
       </div>
-      <p class="body-text" style="font-size:.84rem;margin:20px 0;opacity:.7">You can close this tab once you've clicked the link. Steadfast will open automatically.</p>
+      <p class="body-text" style="font-size:.84rem;margin:20px 0;opacity:.7">You can close this tab once you've clicked the link. Woblii will open automatically.</p>
       <div class="gap-lg"></div>
       <button class="btn btn-ghost btn-sm" onclick="go('signin')">Try a different email</button>
     </div>
@@ -653,7 +653,7 @@ function rWelcome(){
   const g=HOUR<12?'morning':HOUR<17?'afternoon':'evening';
   return`<div class="screen" style="display:flex">
     <div class="screen-inner" style="justify-content:center;text-align:center">
-      <div class="logo" style="animation:fadeIn .8s both">Steadfast</div>
+      <div class="logo" style="animation:fadeIn .8s both">Woblii</div>
       <div class="display" style="margin-bottom:14px;animation:fadeIn .8s .14s both">Good ${g}.</div>
       <p class="body-text" style="margin-bottom:44px;max-width:290px;margin-inline:auto;animation:fadeIn .8s .28s both">Before the day, let's find out where you actually are.</p>
       <button class="btn btn-primary" onclick="startDay()" style="animation:fadeIn .8s .42s both">Begin →</button>
@@ -669,7 +669,7 @@ function rReturn(){
   const mini=comp&&MSG[comp]?.return?compMini(comp,MSG[comp].return):'';
   return`<div class="screen" style="display:flex">
     <div class="screen-inner" style="justify-content:center;text-align:center">
-      <div class="logo" style="margin-bottom:36px">Steadfast</div>
+      <div class="logo" style="margin-bottom:36px">Woblii</div>
       <div class="ret-quote">You're back.<br><strong>Nothing is held against you.</strong><br>The only thing that matters<br>is that you're here now.</div>
       ${mini?`<div style="max-width:380px;margin:0 auto 16px;text-align:left">${mini}</div>`:''}
       <div class="divider"></div>
@@ -686,7 +686,7 @@ function rStateCheck(){
   const mini=sel?.companion&&MSG[sel.companion]?.stateCheck?.[tmp.state]?compMini(sel.companion,MSG[sel.companion].stateCheck[tmp.state]):'';
   return`<div class="screen" style="display:flex">
     <div class="screen-inner">
-      <div class="logo">Steadfast</div>
+      <div class="logo">Woblii</div>
       <div class="pdots"><div class="pdot act"></div><div class="pdot"></div><div class="pdot"></div></div>
       <div class="heading" style="margin-bottom:8px">Who are you <em>today?</em></div>
       <p class="body-text" style="margin-bottom:22px">Not who you should be. Who you actually are right now.</p>
@@ -709,7 +709,7 @@ function rBodyCheck(){
   const note=bodyNote();
   return`<div class="screen" style="display:flex">
     <div class="screen-inner">
-      <div class="logo">Steadfast</div>
+      <div class="logo">Woblii</div>
       <div class="pdots"><div class="pdot dn"></div><div class="pdot act"></div><div class="pdot"></div></div>
       <div class="heading" style="margin-bottom:8px">How's your <em>body?</em></div>
       <p class="body-text" style="margin-bottom:22px">Your brain runs on your body. This shapes what we ask today.</p>
@@ -737,7 +737,7 @@ function rRegulation(){
   const isLow=['flat','fragile'].includes(tmp.state);
   return`<div class="reg-screen" style="display:flex">
     <div style="max-width:420px;width:100%;margin:0 auto;text-align:center">
-      <div class="logo" style="margin-bottom:20px">Steadfast</div>
+      <div class="logo" style="margin-bottom:20px">Woblii</div>
       <div class="pdots" style="justify-content:center"><div class="pdot dn"></div><div class="pdot dn"></div><div class="pdot act"></div></div>
       <div class="heading" style="margin-bottom:6px">Before we begin</div>
       <p class="body-text" style="font-size:.87rem">Planning works better when the nervous system is ready to receive it.</p>
@@ -943,7 +943,7 @@ function rNight(){
 function rDone(){
   const msg=todayData.close?.tomorrow||'';
   return`<div class="screen" style="display:flex"><div class="screen-inner" style="justify-content:center;text-align:center">
-    <div class="logo" style="margin-bottom:55px">Steadfast</div>
+    <div class="logo" style="margin-bottom:55px">Woblii</div>
     <div class="display" style="margin-bottom:14px">Day closed.</div>
     ${msg?`<div class="card" style="text-align:left;margin:22px 0"><p class="label" style="margin-bottom:7px">From you, to tomorrow</p><p style="font-family:var(--font-d);font-style:italic;font-size:1rem;line-height:1.5;color:var(--text-soft)">${msg}</p></div>`:''}
     <p class="body-text" style="margin:22px 0">Coming back is the whole skill.<br>You have already done it.</p>
