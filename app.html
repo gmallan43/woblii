@@ -744,32 +744,45 @@ async function fetchGlucose(){
   if(!userPrefs?.libre_email||!userPrefs?.libre_password)return null;
   const HEADERS={'Content-Type':'application/json','version':'4.7.0','product':'llu.android','Accept-Encoding':'gzip','cache-control':'no-cache'};
   const CREDS={email:userPrefs.libre_email,password:userPrefs.libre_password};
-  // Regional endpoints
   const REGIONS={'EU':'api-eu','US':'api-us','AE':'api-ae','AP':'api-ap','AU':'api-au','CA':'api-ca','DE':'api-de','FR':'api-fr','JP':'api-jp'};
   const region=userPrefs?.libre_region||'EU';
   const subdomain=REGIONS[region]||'api-eu';
   const BASE=`https://${subdomain}.libreview.io`;
-  try{
-    // Step 1: initial login (may redirect to regional server)
+  // Hard 8 second timeout — never hang the UI indefinitely
+  const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),8000));
+  const doFetch=async()=>{
     const r1=await fetch('https://api.libreview.io/llu/auth/login',{method:'POST',headers:HEADERS,body:JSON.stringify(CREDS)});
     const d1=await r1.json();
-    // If redirect response, use regional endpoint
     let token=d1?.data?.authTicket?.token;
     if(!token&&d1?.data?.redirect){
-      // Step 2: login to correct regional server
       const r2=await fetch(`${BASE}/llu/auth/login`,{method:'POST',headers:HEADERS,body:JSON.stringify(CREDS)});
       const d2=await r2.json();
       token=d2?.data?.authTicket?.token;
     }
     if(!token)return null;
-    // Get connections from regional server
     const cr=await fetch(`${BASE}/llu/connections`,{headers:{...HEADERS,'Authorization':`Bearer ${token}`}});
     const cd=await cr.json();
     const conn=cd?.data?.[0];if(!conn)return null;
     const r=conn.glucoseMeasurement;
     if(!r?.ValueInMgPerDl)return null;
     return{value:r.ValueInMgPerDl,valueMmol:(r.ValueInMgPerDl/18).toFixed(1),trend:r.TrendArrow,patientName:conn.firstName||''};
-  }catch(e){console.log('Libre:',e);return null}
+  };
+  try{return await Promise.race([doFetch(),timeout])}
+  catch(e){console.log('Libre:',e.message);return null}
+}
+
+async function testLibre(){
+  const btn=document.querySelector('[onclick="testLibre()"]');
+  if(btn){btn.textContent='Testing...';btn.disabled=true;}
+  try{
+    const g=await fetchGlucose();
+    if(g)toast(`Connected! Current reading: ${g.valueMmol} mmol/L`,3000);
+    else toast('Could not connect. Check your email, password and region.',3500);
+  }catch(e){
+    toast('Connection timed out. Check your details and try again.',3500);
+  }finally{
+    if(btn){btn.textContent='Test connection';btn.disabled=false;}
+  }
 }
 function glucoseInsight(g){
   if(!g?.valueMmol)return null;
@@ -837,19 +850,17 @@ function generateInsights(days){
 // LOAD USER DATA
 // ================================================================
 async function loadUserData(){
-  const[row,ev,prefs,days]=await Promise.all([dbLoadToday(),dbLoadEvidence(),dbLoadPrefs(),dbLoadAllDays()]);
+  function safe(p,fb){return Promise.race([p.catch(()=>fb),new Promise(r=>setTimeout(()=>r(fb),6000))])}
+  const[row,ev,prefs,days]=await Promise.all([
+    safe(dbLoadToday(),null),safe(dbLoadEvidence(),[]),safe(dbLoadPrefs(),null),safe(dbLoadAllDays(),[])
+  ]);
   todayData=row?{date:row.date,state:row.state||'',body:row.body||{},oneRealThing:row.one_real_thing||'',ortDone:row.ort_done||false,tasks:row.tasks||[],voltageBox:row.voltage_box||[],close:row.close||null}:freshToday();
-  evidenceItems=ev;
-  userPrefs=prefs||{};
-  allDays=days||[];
-  if(userPrefs.libre_email)fetchGlucose().then(g=>{glucoseData=g});
-  checkDailyEmail();
-
-  // First time user — show onboarding
+  evidenceItems=ev||[];userPrefs=prefs||{};allDays=days||[];
+  if(userPrefs.libre_email)fetchGlucose().then(g=>{glucoseData=g}).catch(()=>{});
+  checkDailyEmail().catch(()=>{});
   if(!userPrefs.onboarding_complete){go('onboarding');return}
-
   if(todayData.state){document.body.dataset.state=todayData.state;go('day');return}
-  const lastDate=await dbGetLastDate();
+  const lastDate=await safe(dbGetLastDate(),null);
   if(lastDate){
     const d=Math.floor((new Date(TODAY)-new Date(lastDate))/(86400000));
     if(d>=3){go('return');return}
@@ -1549,13 +1560,6 @@ async function saveLibreSettings(){
   await dbSavePrefs({libre_email:email,libre_password:pass});
   toast('Libre settings saved.');
 }
-async function testLibre(){
-  toast('Testing connection...',4000);
-  const g=await fetchGlucose();
-  if(g)toast(`Connected! Current reading: ${g.valueMmol} mmol/L`);
-  else toast('Could not connect. Check your email and password.',3500);
-}
-
 // OTHER SCREENS
 function rEvidence(){
   const items=evidenceItems.length
@@ -1738,13 +1742,21 @@ function saveClose(){
 // INIT
 document.addEventListener('DOMContentLoaded',()=>{
   go('loading');
+  // Safety net: if stuck on loading screen for 10s, go to signin
+  const loadingGuard=setTimeout(()=>{
+    if(document.querySelector('.breathe-circle')){go('signin')}
+  },10000);
   sb.auth.onAuthStateChange(async(event,session)=>{
+    clearTimeout(loadingGuard);
     if(session?.user){
       currentUser=session.user;
       if(window.location.hash&&window.location.hash.includes('access_token')){
         window.history.replaceState({},document.title,window.location.pathname+window.location.search);
       }
-      await loadUserData();
+      try{await loadUserData()}catch(e){
+        console.error('loadUserData error:',e);
+        todayData=freshToday();go('welcome');
+      }
     }else{
       currentUser=null;todayData=freshToday();evidenceItems=[];
       go('signin');
