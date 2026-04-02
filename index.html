@@ -1,9 +1,15 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Woblii</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woblii — A companion for every kind of day</title>
+<meta name="description" content="Some days are flat. Some days are flying. Woblii meets you where you actually are. A daily companion built for ADHD and bipolar minds.">
+<meta property="og:title" content="Woblii — A companion for every kind of day">
+<meta property="og:description" content="Not a productivity app. Something more honest than that.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.woblii.com">
+<meta name="theme-color" content="#181512">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -11,1246 +17,481 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#181512;--surface:#221e18;--surface2:#2c271f;
-  --border:rgba(201,168,76,0.15);--accent:#c9a84c;--accent-dim:rgba(201,168,76,0.28);
-  --teal:#4a9b8e;--teal-dim:rgba(74,155,142,0.22);
+  --border:rgba(201,168,76,0.12);--accent:#c9a84c;--accent-dim:rgba(201,168,76,0.2);
   --text:#f0ebe0;--text-muted:#8a8070;--text-soft:#b8b0a0;
-  --voltage:#c47a5a;--voltage-dim:rgba(196,122,90,0.18);
-  --danger:#c47a5a;--success:#6aab7c;
-  --radius:14px;--radius-sm:8px;
+  --success:#6aab7c;--radius:14px;
   --font-d:'Cormorant Garamond',Georgia,serif;
   --font-b:'Libre Franklin',system-ui,sans-serif;
 }
-[data-state=flat]{--accent:#7a8fa8;--accent-dim:rgba(122,143,168,0.22);--teal:#5a7888;--bg:#12141a;--surface:#191c24;--surface2:#1f2230;--border:rgba(100,120,160,0.15)}
-[data-state=fragile]{--accent:#a0a0b8;--accent-dim:rgba(160,160,184,0.2);--teal:#8888a8;--bg:#141416;--surface:#1c1c20;--surface2:#222228;--border:rgba(160,160,184,0.15)}
-[data-state=steady]{--accent:#7ab87a;--accent-dim:rgba(122,184,122,0.22);--teal:#5aa870;--border:rgba(122,184,122,0.2);--bg:#141a14;--surface:#1a201a;--surface2:#202820}
-[data-state=energised]{--accent:#d4b454;--accent-dim:rgba(212,180,84,0.3);--teal:#54b0a0;--border:rgba(212,180,84,0.2)}
-[data-state=lit-up]{--accent:#ff9040;--accent-dim:rgba(255,144,64,0.3);--teal:#ffb040;--border:rgba(255,144,64,0.25);--voltage:#ff6030}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-weight:300;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-b);font-weight:300;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background .5s,color .5s}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.42;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E")}
-#app{min-height:100vh;display:flex;flex-direction:column}
-.screen{display:none;flex-direction:column;min-height:100vh}
-.screen-inner{max-width:540px;width:100%;margin:0 auto;padding:40px 24px 60px;flex:1;display:flex;flex-direction:column}
-@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.fade-in{animation:fadeIn .5s ease both}
+/* GRAIN */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E")}
 
-.display{font-family:var(--font-d);font-weight:300;font-size:clamp(1.9rem,5.5vw,2.8rem);line-height:1.15;letter-spacing:-.01em}
-.display em,.heading em{font-style:italic;color:var(--accent)}
-.heading{font-family:var(--font-d);font-weight:400;font-size:clamp(1.25rem,3.5vw,1.65rem);line-height:1.2;color:var(--text)}
-.label{font-family:var(--font-b);font-weight:500;font-size:.67rem;letter-spacing:.13em;text-transform:uppercase;color:var(--text-muted)}
-.body-text{font-size:.93rem;color:var(--text-soft);line-height:1.72}
-.muted{color:var(--text-muted)}
-.logo{font-family:var(--font-d);font-weight:300;font-size:1.05rem;letter-spacing:.22em;color:var(--accent);text-transform:uppercase;margin-bottom:44px}
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+@keyframes crunchyBounce{0%,100%{transform:translateY(0) rotate(-2deg)}30%{transform:translateY(-8px) rotate(4deg)}65%{transform:translateY(-4px) rotate(-1deg)}}
+@keyframes grumbleSway{0%,100%{transform:rotate(0)}25%{transform:rotate(-2deg)}75%{transform:rotate(1.5deg)}}
+@keyframes pebbleBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+@keyframes colinBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes pipFizz{0%,100%{transform:translateY(0) rotate(-3deg)}25%{transform:translateY(-10px) rotate(6deg)}75%{transform:translateY(-5px) rotate(-4deg)}}
+@keyframes armWave{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(20deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:16px;transition:background .4s,border .4s}
-.card-sm{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:15px;margin-bottom:12px;transition:background .4s,border .4s}
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:50px;border:none;cursor:pointer;font-family:var(--font-b);font-weight:500;font-size:.84rem;letter-spacing:.05em;transition:all .25s;-webkit-tap-highlight-color:transparent}
-.btn-primary{background:var(--accent);color:var(--bg)}.btn-primary:hover{opacity:.87;transform:translateY(-1px)}
-.btn-ghost{background:transparent;color:var(--text-soft);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--accent-dim);color:var(--text)}
-.btn-teal{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(74,155,142,.28)}
-.btn-voltage{background:var(--voltage-dim);color:var(--voltage);border:1px solid rgba(196,122,90,.28)}
-.btn-full{width:100%}.btn-sm{padding:7px 15px;font-size:.79rem}
-.btn-icon{width:40px;height:40px;padding:0;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-size:1rem;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
-.btn-icon:hover{border-color:var(--accent-dim);color:var(--accent)}
-.btn-danger{background:transparent;color:var(--text-muted);border:1px solid rgba(196,122,90,.2);font-size:.75rem;padding:6px 14px}.btn-danger:hover{border-color:var(--danger);color:var(--danger)}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(var(--bg),transparent);transition:background .3s}
+nav.scrolled{background:rgba(24,21,18,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-d);font-weight:300;font-size:1.2rem;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;text-decoration:none}
+.nav-cta{padding:9px 20px;border-radius:50px;background:var(--accent);color:var(--bg);font-family:var(--font-b);font-weight:500;font-size:.8rem;letter-spacing:.05em;text-decoration:none;transition:opacity .2s}
+.nav-cta:hover{opacity:.85}
 
-.state-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:22px 0}
-@media(max-width:400px){.state-grid{grid-template-columns:repeat(3,1fr)}}
-.state-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
-.state-btn:hover{border-color:var(--accent-dim)}.state-btn.selected{background:var(--accent-dim);border-color:var(--accent)}
-.state-btn .emoji{font-size:1.4rem}
-.state-btn .slabel{font-size:.62rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
-.state-btn.selected .slabel{color:var(--accent)}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(201,168,76,.06),transparent 60%);pointer-events:none}
+.hero-eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);opacity:.7;margin-bottom:20px;animation:fadeUp .8s .2s ease both}
+.hero-title{font-family:var(--font-d);font-weight:300;font-size:clamp(2.8rem,7vw,5.5rem);line-height:1.1;letter-spacing:-.02em;color:var(--text);margin-bottom:10px;animation:fadeUp .8s .35s ease both}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-title .line-2{display:block;opacity:.65}
+.hero-sub{font-size:clamp(.95rem,2vw,1.15rem);color:var(--text-soft);max-width:480px;margin:20px auto 44px;line-height:1.7;animation:fadeUp .8s .5s ease both}
+.hero-cta-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;animation:fadeUp .8s .65s ease both}
+.btn-hero{padding:15px 36px;border-radius:50px;background:var(--accent);color:var(--bg);font-family:var(--font-b);font-weight:500;font-size:.95rem;letter-spacing:.05em;text-decoration:none;transition:all .25s;display:inline-block}
+.btn-hero:hover{opacity:.87;transform:translateY(-2px)}
+.btn-hero-ghost{padding:15px 28px;border-radius:50px;background:transparent;color:var(--text-soft);font-family:var(--font-b);font-weight:400;font-size:.9rem;letter-spacing:.03em;text-decoration:none;border:1px solid var(--border);transition:all .25s;display:inline-block}
+.btn-hero-ghost:hover{border-color:var(--accent-dim);color:var(--text)}
+.hero-note{font-size:.75rem;color:var(--text-muted);margin-top:16px;animation:fadeUp .8s .8s ease both}
 
-.body-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}.body-row:last-child{border-bottom:none}
-.body-row .q{flex:1;font-size:.88rem}
-.bopts{display:flex;gap:5px;flex-wrap:wrap}
-.bopt{padding:5px 9px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:.73rem;cursor:pointer;transition:all .2s;white-space:nowrap;color:var(--text-soft);font-family:var(--font-b);-webkit-tap-highlight-color:transparent}
-.bopt.on{background:var(--teal-dim);border-color:var(--teal);color:var(--teal)}
+/* COMPANIONS ROW */
+.companions-row{display:flex;align-items:flex-end;justify-content:center;gap:clamp(8px,3vw,32px);padding:40px 24px 0;animation:fadeUp .8s .9s ease both;flex-wrap:wrap}
+.companion-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:default}
+.companion-state-tag{font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;opacity:.7}
+.companion-item:nth-child(1) .companion-state-tag{background:rgba(122,143,168,.15);color:#7a8fa8}
+.companion-item:nth-child(2) .companion-state-tag{background:rgba(160,160,184,.12);color:#a0a0b8}
+.companion-item:nth-child(3) .companion-state-tag{background:rgba(122,184,122,.12);color:#7ab87a}
+.companion-item:nth-child(4) .companion-state-tag{background:rgba(212,180,84,.15);color:#d4b454}
+.companion-item:nth-child(5) .companion-state-tag{background:rgba(255,144,64,.15);color:#ff9040}
 
-.jar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.jar-drops{display:flex;flex-wrap:wrap;gap:4px}
-.drop{width:10px;height:13px;background:var(--teal-dim);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;border:1px solid rgba(74,155,142,.22);transition:all .3s}
-.drop.used{background:var(--teal);border-color:var(--teal)}.drop.over{background:var(--voltage);border-color:var(--voltage)}
+/* SECTIONS */
+section{padding:100px 24px;max-width:900px;margin:0 auto}
+.section-label{font-size:.68rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);opacity:.65;margin-bottom:16px}
+.section-title{font-family:var(--font-d);font-weight:300;font-size:clamp(2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.01em;margin-bottom:20px}
+.section-title em{font-style:italic;color:var(--accent)}
+.section-body{font-size:1rem;color:var(--text-soft);line-height:1.8;max-width:560px}
 
-.ort-card{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--accent-dim);border-radius:var(--radius);padding:22px;margin-bottom:18px;position:relative;overflow:hidden;transition:all .4s}
-.ort-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);border-radius:3px 0 0 3px;transition:background .4s}
-.ort-card.done{border-color:var(--success);opacity:.72}.ort-card.done::before{background:var(--success)}
-.ort-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--font-d);font-size:1.25rem;font-weight:300;padding:7px 0;outline:none;margin-top:9px;transition:border-color .2s}
-.ort-input:focus{border-bottom-color:var(--accent)}.ort-input::placeholder{color:var(--text-muted);font-style:italic}
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 24px}
 
-.task-item{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;transition:all .28s;position:relative}
-.task-item.done{opacity:.42;text-decoration:line-through;text-decoration-color:var(--success)}.task-item.done .tchk{background:var(--success);border-color:var(--success)}
-.tchk{width:21px;height:21px;min-width:21px;border-radius:6px;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;font-size:.72rem;transition:all .22s;-webkit-tap-highlight-color:transparent;margin-top:1px}
-.tchk:hover{border-color:var(--accent)}
-.tcontent{flex:1;min-width:0}
-.ttext{font-size:.9rem;color:var(--text);line-height:1.4;word-break:break-word}
-.tmeta{display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap}
-.sbadge{font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:20px}
-.sbadge.tiny{background:rgba(106,171,124,.14);color:var(--success)}.sbadge.small{background:var(--teal-dim);color:var(--teal)}.sbadge.medium{background:var(--accent-dim);color:var(--accent)}.sbadge.heavy{background:var(--voltage-dim);color:var(--voltage)}
-.tbc{margin-top:5px;padding:4px 9px;background:rgba(74,155,142,.07);border-radius:5px;border-left:2px solid var(--teal);display:flex;align-items:center;gap:5px}
-.tbc span{font-size:.73rem;color:var(--teal);font-style:italic}
-.tdel{opacity:0;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.92rem;padding:2px 3px;transition:all .2s;line-height:1;flex-shrink:0}
-.task-item:hover .tdel{opacity:1}.task-item:hover .tdel:hover{color:var(--danger)}
+/* FEATURES GRID */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:48px}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:border .3s}
+.feature-card:hover{border-color:var(--accent-dim)}
+.feature-icon{font-size:1.6rem;margin-bottom:14px}
+.feature-title{font-family:var(--font-d);font-weight:400;font-size:1.2rem;margin-bottom:8px;color:var(--text)}
+.feature-desc{font-size:.85rem;color:var(--text-muted);line-height:1.65}
 
-.enough-line{display:flex;align-items:center;gap:11px;margin:14px 0}
-.enough-line .el{flex:1;height:1px;background:linear-gradient(90deg,var(--accent),transparent)}
-.enough-line .er{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--accent))}
-.enough-line .etxt{font-family:var(--font-d);font-style:italic;font-size:.83rem;color:var(--accent);white-space:nowrap;font-weight:400}
+/* STATES SECTION */
+.states-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:40px}
+.state-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;transition:all .3s}
+.state-card:hover{transform:translateY(-3px);border-color:var(--accent-dim)}
+.state-emoji{font-size:1.6rem}
+.state-name{font-family:var(--font-d);font-size:1.1rem;color:var(--text);font-weight:400}
+.state-companion{font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+.state-quote{font-size:.82rem;color:var(--text-muted);font-style:italic;line-height:1.5}
 
-.add-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:15px;margin-bottom:11px;display:none}.add-form.open{display:block}
-.ati{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--font-b);font-size:.88rem;padding:5px 0 7px;outline:none;margin-bottom:13px}
-.ati::placeholder{color:var(--text-muted)}.ati:focus{border-bottom-color:var(--accent)}
-.size-sel{display:flex;gap:5px;margin-bottom:11px;flex-wrap:wrap}
-.sopt{padding:5px 11px;border-radius:20px;background:var(--surface);border:1px solid var(--border);font-size:.73rem;cursor:pointer;color:var(--text-soft);transition:all .2s;font-family:var(--font-b);-webkit-tap-highlight-color:transparent}
-.sopt.on{background:var(--teal-dim);border-color:var(--teal);color:var(--teal)}
-.bci{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text-muted);font-family:var(--font-b);font-size:.8rem;font-style:italic;padding:4px 0 5px;outline:none;margin-bottom:11px}
-.bci::placeholder{color:var(--text-muted);opacity:.55}
+/* HONEST SECTION */
+.honest-section{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:clamp(32px,6vw,64px);text-align:center;position:relative;overflow:hidden}
+.honest-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.07),transparent 60%);pointer-events:none}
+.honest-title{font-family:var(--font-d);font-weight:300;font-size:clamp(1.8rem,4.5vw,3rem);line-height:1.2;margin-bottom:24px}
+.honest-title em{font-style:italic;color:var(--accent)}
+.honest-points{display:flex;flex-direction:column;gap:14px;max-width:480px;margin:0 auto 40px;text-align:left}
+.honest-point{display:flex;align-items:flex-start;gap:14px;font-size:.9rem;color:var(--text-soft);line-height:1.6}
+.honest-point-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:8px}
 
-.vbox{background:var(--surface);border:1px solid rgba(196,122,90,.28);border-radius:var(--radius);padding:18px;margin-bottom:18px}
-.vrule{font-size:.77rem;color:var(--text-muted);font-style:italic;margin-bottom:11px;padding:8px 11px;background:var(--voltage-dim);border-radius:var(--radius-sm);line-height:1.5}
-.vitem{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);font-size:.83rem}.vitem:last-child{border-bottom:none}
-.vage{font-size:.68rem;color:var(--text-muted);flex-shrink:0;margin-top:1px}.vtxt{flex:1;color:var(--text-soft)}
+/* HOW IT WORKS */
+.steps{display:flex;flex-direction:column;gap:0;margin-top:40px;position:relative}
+.steps::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;background:linear-gradient(var(--border),var(--border));opacity:.5}
+.step{display:flex;gap:24px;padding:0 0 36px 0;position:relative}
+.step-num{width:40px;height:40px;min-width:40px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1rem;color:var(--accent);font-weight:400;position:relative;z-index:1}
+.step-content{padding-top:8px}
+.step-title{font-family:var(--font-d);font-weight:400;font-size:1.2rem;color:var(--text);margin-bottom:6px}
+.step-desc{font-size:.86rem;color:var(--text-muted);line-height:1.65}
 
-.ev-item{padding:11px 15px;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:8px;font-size:.86rem;color:var(--text-soft);border-left:2px solid var(--accent);line-height:1.5}
+/* TESTIMONIALS */
+.testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:40px}
+.testimonial{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.testimonial-text{font-family:var(--font-d);font-style:italic;font-size:1.05rem;line-height:1.6;color:var(--text-soft);margin-bottom:16px}
+.testimonial-author{font-size:.75rem;color:var(--text-muted);letter-spacing:.05em}
 
-.night-screen{background:#0c0a08;min-height:100vh;display:flex;flex-direction:column}
-.night-inner{max-width:420px;margin:0 auto;padding:55px 22px;text-align:center}
-.dump-ta{width:100%;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);color:var(--text-soft);font-family:var(--font-b);font-size:.88rem;padding:15px;outline:none;resize:none;line-height:1.7;min-height:95px;margin:14px 0}
-.dump-ta:focus{border-color:rgba(201,168,76,.28)}.dump-ta::placeholder{color:rgba(255,255,255,.17)}
-.close-ta{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-b);font-size:.88rem;padding:13px;outline:none;resize:none;line-height:1.7;min-height:78px;margin:9px 0 18px;transition:border-color .2s}
-.close-ta:focus{border-color:var(--accent-dim)}.close-ta::placeholder{color:var(--text-muted);font-style:italic}
-.text-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-b);font-size:.88rem;padding:11px 13px;outline:none;transition:border-color .2s;margin:9px 0}
-.text-input:focus{border-color:var(--accent-dim)}.text-input::placeholder{color:var(--text-muted);font-style:italic}
-.pass-input{-webkit-text-security:disc;text-security:disc}
+/* PRIVACY */
+.privacy-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--border)}
+.privacy-row:last-child{border-bottom:none}
+.privacy-icon{font-size:1.1rem;flex-shrink:0}
+.privacy-text{font-size:.88rem;color:var(--text-soft);line-height:1.5}
 
-.top-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 0;max-width:540px;margin:0 auto;width:100%}
-.nav-acts{display:flex;gap:7px}
-.bot-acts{display:flex;gap:9px;padding:18px 22px;border-top:1px solid var(--border);max-width:540px;margin:0 auto;width:100%}
-.divider{height:1px;background:var(--border);margin:18px 0}
-.spacer{flex:1}.gap-sm{height:7px}.gap{height:14px}.gap-lg{height:28px}
-.pdots{display:flex;gap:5px;margin-bottom:28px}
-.pdot{width:6px;height:6px;border-radius:50%;background:var(--border);border:1px solid var(--border);transition:all .28s}
-.pdot.act{background:var(--accent);border-color:var(--accent)}.pdot.dn{background:var(--teal);border-color:var(--teal)}
-.sbadge-state{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;background:var(--accent-dim);border:1px solid var(--accent);font-size:.7rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
-.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.scroll-area::-webkit-scrollbar{width:3px}.scroll-area::-webkit-scrollbar-track{background:transparent}.scroll-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(18px);background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:9px 18px;font-size:.8rem;color:var(--text-soft);opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;z-index:1000}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.ret-quote{font-family:var(--font-d);font-size:clamp(1.35rem,3.8vw,1.7rem);font-weight:300;font-style:italic;line-height:1.4;color:var(--text-soft);text-align:center;margin:28px 0}
-.ret-quote strong{font-style:normal;font-weight:400;color:var(--text)}
-.sec-label{font-size:.63rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:11px;display:flex;align-items:center;gap:9px}
-.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
-.star-sep{text-align:center;color:var(--accent);opacity:.35;font-size:.58rem;letter-spacing:10px;margin:18px 0}
-.cban{background:linear-gradient(135deg,var(--voltage-dim),rgba(196,122,90,.05));border:1px solid rgba(196,122,90,.32);border-radius:var(--radius-sm);padding:11px 15px;font-size:.8rem;color:var(--voltage);margin-bottom:14px;line-height:1.5}
+/* FINAL CTA */
+.final-cta{text-align:center;padding:100px 24px;position:relative;overflow:hidden}
+.final-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(201,168,76,.07),transparent 60%);pointer-events:none}
+.final-title{font-family:var(--font-d);font-weight:300;font-size:clamp(2.2rem,6vw,4rem);line-height:1.15;margin-bottom:16px;letter-spacing:-.01em}
+.final-title em{font-style:italic;color:var(--accent)}
+.final-sub{font-size:1rem;color:var(--text-muted);margin-bottom:40px}
 
-/* GLUCOSE BANNER */
-.glucose-banner{border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;font-size:.82rem;line-height:1.5}
-.glucose-banner.low{background:rgba(196,122,90,.12);border:1px solid rgba(196,122,90,.3);color:var(--voltage)}
-.glucose-banner.normal{background:rgba(74,155,142,.1);border:1px solid rgba(74,155,142,.25);color:var(--teal)}
-.glucose-banner.high{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:var(--accent)}
-.glucose-value{font-family:var(--font-d);font-size:1.6rem;font-weight:300;line-height:1;flex-shrink:0}
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:40px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;max-width:1100px;margin:0 auto}
+.footer-logo{font-family:var(--font-d);font-weight:300;font-size:1rem;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;text-decoration:none}
+.footer-note{font-size:.75rem;color:var(--text-muted);line-height:1.6;text-align:center}
+.footer-link{font-size:.78rem;color:var(--text-muted);text-decoration:none;transition:color .2s}
+.footer-link:hover{color:var(--text)}
 
-/* REG */
-.reg-screen{background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px}
-@keyframes breatheCircle{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.3);opacity:1}}
-.breathe-circle{width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,var(--teal-dim),transparent);border:1.5px solid var(--teal);margin:28px auto;animation:breatheCircle 5s ease-in-out infinite;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--teal);font-weight:500;letter-spacing:.08em}
+/* GRADIENT TEXT */
+.gradient-text{background:linear-gradient(135deg,var(--accent),#e8d880,var(--accent));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite}
 
-/* MIDDAY */
-.midday-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .28s ease both}
-.midday-sheet{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;padding:26px 22px 44px;max-width:540px;width:100%;animation:slideUp .32s cubic-bezier(.34,1.2,.64,1) both}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.mds-btn{padding:7px 14px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:.8rem;cursor:pointer;color:var(--text-soft);transition:all .2s;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;display:inline-block;margin:4px}
-.mds-btn.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+/* RESPONSIVE */
+@media(max-width:600px){
+  nav{padding:16px 20px}
+  section{padding:70px 20px}
+  .final-cta{padding:70px 20px}
+  .honest-section{padding:32px 24px}
+}
 
-/* AUTH */
-.auth-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;background:var(--bg)}
-.auth-inner{max-width:380px;width:100%;margin:0 auto}
-.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-muted);font-size:.75rem}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.sync-indicator{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text-muted);padding:3px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border)}
-.sync-dot{width:5px;height:5px;border-radius:50%;background:var(--success)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.sync-dot.syncing{background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
-
-/* COMPANIONS */
-@keyframes bubblePop{0%{transform:scale(.65) translateY(9px);opacity:0}62%{transform:scale(1.05) translateY(-2px);opacity:1}100%{transform:scale(1);opacity:1}}
-.companion-card{display:flex;align-items:flex-end;gap:13px;border-radius:var(--radius);padding:15px 17px;margin-bottom:18px}
-.companion-figure{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px}
-.companion-name{font-size:.58rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase}
-.companion-bubble{flex:1;border-radius:14px 14px 14px 4px;padding:11px 13px;animation:bubblePop .42s cubic-bezier(.34,1.56,.64,1) .26s both;min-height:50px;display:flex;align-items:center;position:relative}
-.companion-bubble::before{content:'';position:absolute;bottom:-1px;left:-7px;width:11px;height:9px;border-radius:0 0 0 7px;clip-path:polygon(100% 0,0 100%,100% 100%)}
-.companion-bubble p{font-size:.84rem;line-height:1.52;font-weight:400}
-.companion-bubble p strong{font-weight:600}
-
-/* Grumble */
-.grumble-card{background:linear-gradient(135deg,rgba(130,120,180,.08),rgba(100,95,150,.04));border:1px solid rgba(140,130,190,.2)}
-.grumble-card .companion-name{color:rgba(160,150,200,.4)}
-.grumble-card .companion-bubble{background:rgba(130,120,170,.1);border:1px solid rgba(140,130,190,.22)}
-.grumble-card .companion-bubble::before{background:rgba(130,120,170,.1);border-left:1px solid rgba(140,130,190,.22);border-bottom:1px solid rgba(140,130,190,.22)}
-.grumble-card .companion-bubble p{color:#b8b0d8}
-/* Pebble */
-.pebble-card{background:linear-gradient(135deg,rgba(160,160,190,.07),rgba(130,130,160,.03));border:1px solid rgba(170,170,200,.16)}
-.pebble-card .companion-name{color:rgba(180,180,210,.38)}
-.pebble-card .companion-bubble{background:rgba(150,150,180,.09);border:1px solid rgba(170,170,200,.18)}
-.pebble-card .companion-bubble::before{background:rgba(150,150,180,.09);border-left:1px solid rgba(170,170,200,.18);border-bottom:1px solid rgba(170,170,200,.18)}
-.pebble-card .companion-bubble p{color:#c0c0d8}
-/* Colin */
-.colin-card{background:linear-gradient(135deg,rgba(74,160,80,.09),rgba(60,130,65,.04));border:1px solid rgba(90,180,90,.22)}
-.colin-card .companion-name{color:rgba(120,200,120,.4)}
-.colin-card .companion-bubble{background:rgba(74,160,80,.1);border:1px solid rgba(90,180,90,.25)}
-.colin-card .companion-bubble::before{background:rgba(74,160,80,.1);border-left:1px solid rgba(90,180,90,.25);border-bottom:1px solid rgba(90,180,90,.25)}
-.colin-card .companion-bubble p{color:#a8d8a8}
-/* Crunchy */
-.crunchy-card{background:linear-gradient(135deg,rgba(245,197,24,.09),rgba(245,197,24,.04));border:1px solid rgba(245,197,24,.26)}
-.crunchy-card .companion-name{color:rgba(245,197,24,.42)}
-.crunchy-card .companion-bubble{background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.28)}
-.crunchy-card .companion-bubble::before{background:rgba(245,197,24,.1);border-left:1px solid rgba(245,197,24,.28);border-bottom:1px solid rgba(245,197,24,.28)}
-.crunchy-card .companion-bubble p{color:#f0d050}
-/* Pip */
-.pip-card{background:linear-gradient(135deg,rgba(255,120,40,.1),rgba(255,80,20,.04));border:1px solid rgba(255,120,40,.28)}
-.pip-card .companion-name{color:rgba(255,150,80,.42)}
-.pip-card .companion-bubble{background:rgba(255,100,30,.1);border:1px solid rgba(255,120,40,.3)}
-.pip-card .companion-bubble::before{background:rgba(255,100,30,.1);border-left:1px solid rgba(255,120,40,.3);border-bottom:1px solid rgba(255,120,40,.3)}
-.pip-card .companion-bubble p{color:#ffb070}
-
-/* SVG ANIMATIONS */
-@keyframes crunchyBounce{0%,100%{transform:translateY(0) rotate(-2deg)}30%{transform:translateY(-10px) rotate(4deg)}65%{transform:translateY(-5px) rotate(-1deg)}}
-@keyframes crunchyPop{0%{transform:scale(.45) translateY(16px);opacity:0}62%{transform:scale(1.13) translateY(-3px);opacity:1}100%{transform:scale(1);opacity:1}}
-@keyframes crunchyIdle{0%,86%,100%{transform:rotate(0)}89%{transform:rotate(-5deg)}93%{transform:rotate(6deg)}}
-@keyframes armWave{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(22deg)}}
-@keyframes grumbleSway{0%,100%{transform:rotate(0)}25%{transform:rotate(-1.5deg) translateY(-2px)}75%{transform:rotate(1deg) translateY(-1px)}}
-@keyframes grumblePop{0%{transform:scale(.5) translateY(12px);opacity:0}55%{transform:scale(1.08) translateY(-2px);opacity:1}100%{transform:scale(1);opacity:1}}
-@keyframes grumbleHuff{0%,90%,100%{transform:scale(1)}93%{transform:scale(1.04) translateY(-2px)}96%{transform:scale(.98)}}
-@keyframes colinBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px) rotate(.4deg)}}
-@keyframes colinPop{0%{transform:scale(.5) translateY(12px);opacity:0}58%{transform:scale(1.06) translateY(-2px);opacity:1}100%{transform:scale(1);opacity:1}}
-@keyframes pebblePop{0%{transform:scale(.4) translateY(8px);opacity:0}60%{transform:scale(1.05) translateY(-1px);opacity:1}100%{transform:scale(1);opacity:1}}
-@keyframes pebbleBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
-@keyframes pipPop{0%{transform:scale(.3) translateY(16px) rotate(-20deg);opacity:0}50%{transform:scale(1.2) translateY(-4px) rotate(5deg);opacity:1}75%{transform:scale(.95) rotate(-2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
-@keyframes pipFizz{0%,100%{transform:translateY(0) rotate(-3deg)}20%{transform:translateY(-12px) rotate(8deg)}40%{transform:translateY(-6px) rotate(-5deg)}60%{transform:translateY(-10px) rotate(6deg)}80%{transform:translateY(-3px) rotate(-2deg)}}
-@keyframes pipSpin{0%,85%,100%{transform:rotate(0)}90%{transform:rotate(360deg)}}
-
-.grumble-svg-wrap{filter:drop-shadow(0 5px 12px rgba(0,0,0,.5));animation:grumblePop .58s cubic-bezier(.34,1.4,.64,1) both,grumbleSway 4.5s ease-in-out .7s infinite,grumbleHuff 12s ease-in-out .7s infinite;transform-origin:bottom center}
-.grumble-eyes{animation:grumbleHuff 11s ease-in-out 2s infinite}
-.pebble-svg-wrap{filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));animation:pebblePop .5s cubic-bezier(.34,1.3,.64,1) both,pebbleBreath 5s ease-in-out .6s infinite;transform-origin:bottom center}
-.colin-svg-wrap{filter:drop-shadow(0 5px 11px rgba(0,0,0,.42));animation:colinPop .5s cubic-bezier(.34,1.5,.64,1) both,colinBob 3.8s ease-in-out .5s infinite;transform-origin:bottom center}
-.crunchy-svg-wrap{filter:drop-shadow(0 5px 10px rgba(0,0,0,.42));animation:crunchyPop .52s cubic-bezier(.34,1.56,.64,1) both,crunchyBounce 2.5s ease-in-out .6s infinite,crunchyIdle 9s ease-in-out .6s infinite;transform-origin:bottom center}
-.crunchy-arm-wave{transform-origin:10px 10px;animation:armWave .72s ease-in-out infinite alternate}
-.pip-svg-wrap{filter:drop-shadow(0 4px 14px rgba(255,100,30,.4));animation:pipPop .55s cubic-bezier(.34,1.56,.64,1) both,pipFizz 1.8s ease-in-out .6s infinite,pipSpin 7s ease-in-out 1s infinite;transform-origin:center}
-
-.companion-mini{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:var(--radius-sm);margin:11px 0;animation:fadeIn .4s ease both}
-.companion-mini p{font-size:.81rem;line-height:1.42}
-.companion-mini p strong{font-weight:600}
-
-@media(max-width:400px){.screen-inner{padding:26px 15px 50px}.top-nav{padding:15px 15px 0}}
+/* COMPANION ANIMATIONS IN LANDING */
+.c-grumble{animation:grumbleSway 4.5s ease-in-out infinite}
+.c-pebble{animation:pebbleBreath 5s ease-in-out infinite}
+.c-colin{animation:colinBob 3.8s ease-in-out infinite}
+.c-crunchy{animation:crunchyBounce 2.5s ease-in-out infinite}
+.c-pip{animation:pipFizz 1.8s ease-in-out infinite}
+.c-arm{transform-origin:10px 10px;animation:armWave .72s ease-in-out infinite alternate}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div class="toast" id="toast"></div>
-<div id="midday-modal"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="/" class="nav-logo">Woblii</a>
+  <a href="/app.html" class="nav-cta">Begin →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">A companion for every kind of day</p>
+  <h1 class="hero-title">
+    Some days are <em>flying.</em>
+    <span class="line-2">Some days are flat.</span>
+  </h1>
+  <p class="hero-sub">Woblii meets you where you actually are. Not a productivity app. Something more honest than that.</p>
+  <div class="hero-cta-wrap">
+    <a href="/app.html" class="btn-hero">Begin for free →</a>
+    <a href="#how" class="btn-hero-ghost">See how it works</a>
+  </div>
+  <p class="hero-note">No password. No streaks. No pressure.</p>
+
+  <!-- COMPANIONS PREVIEW -->
+  <div class="companions-row">
+    <div class="companion-item">
+      <svg class="c-grumble" viewBox="0 0 100 150" width="52" height="78" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))">
+        <rect x="30" y="108" width="14" height="22" rx="7" fill="#4a3060"/><ellipse cx="35" cy="131" rx="10" ry="5.5" fill="#2a1840"/>
+        <rect x="56" y="108" width="14" height="22" rx="7" fill="#4a3060"/><ellipse cx="65" cy="131" rx="10" ry="5.5" fill="#2a1840"/>
+        <path d="M22,72 Q16,80 20,90 Q26,96 36,92" stroke="#5a4070" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M78,72 Q84,80 80,90 Q74,96 64,92" stroke="#5a4070" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M22,78 Q38,85 50,82 Q62,80 78,78" stroke="#5a4070" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M50,18 C70,16 86,30 88,52 C90,70 84,92 72,104 C62,114 38,114 28,104 C16,92 10,70 12,52 C14,30 30,16 50,18Z" fill="#6a508a" stroke="#5a4070" stroke-width="1.5"/>
+        <path d="M28,28 Q30,10 50,8 Q70,10 72,28Z" fill="#3a2858"/>
+        <rect x="22" y="26" width="56" height="8" rx="4" fill="#4a3868"/>
+        <path d="M22,55 Q18,70 20,85 Q25,105 50,108 Q75,105 80,85 Q82,70 78,55Z" fill="#d8d0e8"/>
+        <path d="M28,42 Q28,58 50,60 Q72,58 72,42 Q72,28 50,26 Q28,28 28,42Z" fill="#8a7098"/>
+        <path d="M32,37 Q38,33 44,36" stroke="#2a1840" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M56,36 Q62,33 68,37" stroke="#2a1840" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="39" cy="43" r="6.5" fill="white"/><circle cx="61" cy="43" r="6.5" fill="white"/>
+        <circle cx="40" cy="44" r="4" fill="#2a1840"/><circle cx="62" cy="44" r="4" fill="#2a1840"/>
+        <circle cx="41.5" cy="42.5" r="1.4" fill="white"/><circle cx="63.5" cy="42.5" r="1.4" fill="white"/>
+        <ellipse cx="50" cy="50" rx="4" ry="3" fill="#7a6088"/>
+        <path d="M41,57 Q50,55 59,57" stroke="#2a1840" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M41,57 Q39,58.5 40,60" stroke="#2a1840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M59,57 Q61,58.5 60,60" stroke="#2a1840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="companion-state-tag">Flat</span>
+    </div>
+    <div class="companion-item">
+      <svg class="c-pebble" viewBox="0 0 120 120" width="56" height="56" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))">
+        <line x1="48" y1="100" x2="42" y2="115" stroke="#7a7a9a" stroke-width="5" stroke-linecap="round"/>
+        <ellipse cx="40" cy="116" rx="8" ry="3.5" fill="#7a7a9a"/>
+        <line x1="72" y1="100" x2="78" y2="115" stroke="#7a7a9a" stroke-width="5" stroke-linecap="round"/>
+        <ellipse cx="80" cy="116" rx="8" ry="3.5" fill="#7a7a9a"/>
+        <line x1="22" y1="68" x2="14" y2="80" stroke="#7a7a9a" stroke-width="4.5" stroke-linecap="round"/><circle cx="13" cy="82" r="4" fill="#7a7a9a"/>
+        <line x1="98" y1="68" x2="106" y2="80" stroke="#7a7a9a" stroke-width="4.5" stroke-linecap="round"/><circle cx="107" cy="82" r="4" fill="#7a7a9a"/>
+        <path d="M60,10 C88,10 108,30 108,58 C108,86 88,106 60,108 C32,106 12,86 12,58 C12,30 32,10 60,10Z" fill="#9898b8" stroke="#8080a0" stroke-width="1.5"/>
+        <path d="M38,18 C50,12 76,18 84,32 C86,38 82,42 78,38 C68,28 48,22 36,24Z" fill="rgba(255,255,255,.18)"/>
+        <circle cx="46" cy="56" r="9" fill="white"/><circle cx="74" cy="56" r="9" fill="white"/>
+        <path d="M37,53 Q46,48 55,53" fill="#9898b8"/><path d="M65,53 Q74,48 83,53" fill="#9898b8"/>
+        <circle cx="47" cy="58" r="5" fill="#2a2840"/><circle cx="75" cy="58" r="5" fill="#2a2840"/>
+        <circle cx="49" cy="56" r="1.8" fill="white"/><circle cx="77" cy="56" r="1.8" fill="white"/>
+        <path d="M50,70 Q60,74 70,70" stroke="#2a2840" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="companion-state-tag">Fragile</span>
+    </div>
+    <div class="companion-item">
+      <svg class="c-colin" viewBox="0 0 80 160" width="36" height="72" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))">
+        <line x1="33" y1="128" x2="28" y2="150" stroke="#2d6e30" stroke-width="5" stroke-linecap="round"/>
+        <ellipse cx="26" cy="151" rx="7" ry="3.5" fill="#2d6e30"/>
+        <line x1="47" y1="128" x2="52" y2="150" stroke="#2d6e30" stroke-width="5" stroke-linecap="round"/>
+        <ellipse cx="54" cy="151" rx="7" ry="3.5" fill="#2d6e30"/>
+        <line x1="16" y1="72" x2="5" y2="92" stroke="#2d6e30" stroke-width="5" stroke-linecap="round"/><circle cx="4" cy="94" r="4.5" fill="#2d6e30"/>
+        <line x1="64" y1="72" x2="74" y2="90" stroke="#2d6e30" stroke-width="5" stroke-linecap="round"/><circle cx="75" cy="92" r="4.5" fill="#2d6e30"/>
+        <path d="M40,12 C58,12 68,28 68,60 C68,95 60,125 40,132 C20,125 12,95 12,60 C12,28 22,12 40,12Z" fill="#4aaa4a" stroke="#368036" stroke-width="1.5"/>
+        <path d="M26,18 C32,14 50,20 56,32 C58,36 55,40 52,37 C44,28 30,22 24,24Z" fill="rgba(255,255,255,.2)"/>
+        <path d="M38,12 Q36,4 40,2 Q44,4 42,12" fill="#2d6e30"/>
+        <ellipse cx="40" cy="44" rx="18" ry="20" fill="#5cc05c" opacity=".6"/>
+        <rect x="22" y="34" width="15" height="10" rx="4" fill="#1a2a3a"/>
+        <rect x="43" y="34" width="15" height="10" rx="4" fill="#1a2a3a"/>
+        <line x1="37" y1="39" x2="43" y2="39" stroke="#0d1820" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="22" y="34" width="15" height="10" rx="4" fill="rgba(80,130,200,.15)"/>
+        <rect x="43" y="34" width="15" height="10" rx="4" fill="rgba(80,130,200,.15)"/>
+        <path d="M33,55 Q40,59 47,55" stroke="#1e5020" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="companion-state-tag">Steady</span>
+    </div>
+    <div class="companion-item">
+      <svg class="c-crunchy" viewBox="0 0 110 132" width="56" height="68" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))">
+        <line x1="42" y1="100" x2="33" y2="120" stroke="#bf8c08" stroke-width="3.8" stroke-linecap="round"/>
+        <ellipse cx="30" cy="122" rx="7" ry="3.5" fill="#bf8c08" transform="rotate(-8,30,122)"/>
+        <line x1="64" y1="100" x2="73" y2="120" stroke="#bf8c08" stroke-width="3.8" stroke-linecap="round"/>
+        <ellipse cx="76" cy="122" rx="7" ry="3.5" fill="#bf8c08" transform="rotate(8,76,122)"/>
+        <g class="c-arm"><line x1="20" y1="54" x2="4" y2="37" stroke="#bf8c08" stroke-width="3.8" stroke-linecap="round"/><circle cx="2" cy="33.5" r="5" fill="#bf8c08"/></g>
+        <line x1="89" y1="56" x2="105" y2="40" stroke="#bf8c08" stroke-width="3.8" stroke-linecap="round"/><circle cx="107" cy="37" r="5" fill="#bf8c08"/>
+        <path d="M55,8 C73,4 94,17 95,38 C97,57 89,77 79,88 C68,99 50,105 36,98 C21,91 9,76 9,58 C9,38 21,13 44,8Z" fill="#F6C918" stroke="#d4a510" stroke-width="1.5"/>
+        <path d="M43,13 C56,9 73,18 78,33 C80,38 77,42 73,39 C62,31 48,22 39,22Z" fill="rgba(255,255,255,.22)"/>
+        <circle cx="43" cy="52" r="9" fill="white"/><circle cx="64" cy="49" r="9" fill="white"/>
+        <circle cx="44" cy="53" r="5.5" fill="#180e00"/><circle cx="65" cy="50" r="5.5" fill="#180e00"/>
+        <circle cx="46" cy="51" r="2" fill="white"/><circle cx="67" cy="48" r="2" fill="white"/>
+        <ellipse cx="30" cy="65" rx="7" ry="4.5" fill="#ff9999" opacity=".36"/><ellipse cx="75" cy="62" rx="7" ry="4.5" fill="#ff9999" opacity=".36"/>
+        <path d="M36,71 Q53,87 71,70" stroke="#180e00" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="companion-state-tag">Energised</span>
+    </div>
+    <div class="companion-item">
+      <svg class="c-pip" viewBox="0 0 90 110" width="48" height="58" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;filter:drop-shadow(0 4px 14px rgba(255,100,30,.35))">
+        <ellipse cx="45" cy="55" rx="38" ry="42" fill="rgba(255,120,30,.07)"/>
+        <line x1="37" y1="88" x2="30" y2="104" stroke="#cc5010" stroke-width="4.5" stroke-linecap="round"/>
+        <ellipse cx="28" cy="105" rx="7" ry="3.2" fill="#cc5010"/>
+        <line x1="53" y1="88" x2="60" y2="104" stroke="#cc5010" stroke-width="4.5" stroke-linecap="round"/>
+        <ellipse cx="62" cy="105" rx="7" ry="3.2" fill="#cc5010"/>
+        <line x1="18" y1="52" x2="2" y2="36" stroke="#cc5010" stroke-width="4" stroke-linecap="round"/><circle cx="1" cy="34" r="4.5" fill="#cc5010"/>
+        <line x1="72" y1="52" x2="88" y2="36" stroke="#cc5010" stroke-width="4" stroke-linecap="round"/><circle cx="89" cy="34" r="4.5" fill="#cc5010"/>
+        <path d="M45,5 C55,2 70,12 72,28 C75,45 68,70 55,82 C50,86 40,86 35,82 C22,70 15,45 18,28 C20,12 35,2 45,5Z" fill="#ff7020" stroke="#dd5010" stroke-width="1.5"/>
+        <path d="M45,10 C52,8 62,16 64,28 C65,38 60,55 52,66 C50,68 46,70 44,68 C36,58 30,40 32,28 C34,16 38,10 45,10Z" fill="#ffaa40" opacity=".6"/>
+        <circle cx="72" cy="20" r="3.5" fill="#ffb030" opacity=".8"/><circle cx="15" cy="22" r="3" fill="#ffb030" opacity=".75"/>
+        <circle cx="38" cy="44" r="9.5" fill="white"/><circle cx="52" cy="44" r="9.5" fill="white"/>
+        <circle cx="39" cy="45" r="6" fill="#1a0800"/><circle cx="53" cy="45" r="6" fill="#1a0800"/>
+        <circle cx="41" cy="43" r="2.2" fill="white"/><circle cx="55" cy="43" r="2.2" fill="white"/>
+        <ellipse cx="28" cy="52" rx="6" ry="4" fill="#ff8844" opacity=".5"/><ellipse cx="62" cy="52" rx="6" ry="4" fill="#ff8844" opacity=".5"/>
+        <path d="M32,60 Q45,74 58,60" stroke="#1a0800" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M40,68 Q45,74 50,68" fill="#ff4444"/>
+      </svg>
+      <span class="companion-state-tag">Lit Up</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="max-width:700px">
+  <p class="section-label reveal">How it works</p>
+  <h2 class="section-title reveal">Built around <em>capacity,</em><br>not time.</h2>
+  <p class="section-body reveal">Most planners assume you are the same person every day. You are not. Woblii knows this.</p>
+
+  <div class="steps">
+    <div class="step reveal reveal-delay-1">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Check in honestly</div>
+        <div class="step-desc">Every morning, tell Woblii who you actually are today. How you slept. Whether you have eaten. Your medication. How your body feels. This is not box ticking. It changes what the day asks of you.</div>
+      </div>
+    </div>
+    <div class="step reveal reveal-delay-2">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Your companion shows up</div>
+        <div class="step-desc">One of five companions appears, matched to your state. Grumble on flat days. Pebble when you are fragile. Colin when you are steady. Crunchy when you are energised. Pip when you are lit up. Each one responds to what is actually happening.</div>
+      </div>
+    </div>
+    <div class="step reveal reveal-delay-3">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">The energy jar, the enough line</div>
+        <div class="step-desc">Tasks are sized by energy cost, not time. Your jar fills up. The enough line shows you exactly when the day is already a success. Everything above it is bonus.</div>
+      </div>
+    </div>
+    <div class="step reveal reveal-delay-4">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Close with kindness</div>
+        <div class="step-desc">Every day ends with two questions. One thing that happened, however small. What tomorrow's version of you needs to know. No scoring. No review. No evidence of failure.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- THE HONEST BIT -->
+<section style="max-width:700px">
+  <div class="honest-section reveal">
+    <h2 class="honest-title">Designed for the days<br>when <em>nothing else works.</em></h2>
+    <div class="honest-points">
+      <div class="honest-point"><div class="honest-point-dot"></div><div>No streaks. Missing a day resets nothing. Coming back is the whole skill.</div></div>
+      <div class="honest-point"><div class="honest-point-dot"></div><div>No rollover shame. Yesterday's unfinished tasks are out of sight until you choose to look.</div></div>
+      <div class="honest-point"><div class="honest-point-dot"></div><div>A crisis page, built during a steady moment, for when nothing else is accessible.</div></div>
+      <div class="honest-point"><div class="honest-point-dot"></div><div>Night mode for the thoughts that circle at 2am. A place to put them down.</div></div>
+      <div class="honest-point"><div class="honest-point-dot"></div><div>The evidence wall. Proof of who you actually are, for the days when you forget.</div></div>
+    </div>
+    <a href="/app.html" class="btn-hero">Begin for free →</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STATES -->
+<section>
+  <p class="section-label reveal">Five companions</p>
+  <h2 class="section-title reveal">One for every<br><em>kind of day.</em></h2>
+  <div class="states-grid">
+    <div class="state-card reveal reveal-delay-1">
+      <span class="state-emoji">🌫️</span>
+      <div class="state-name">Flat</div>
+      <div class="state-companion">With Grumble</div>
+      <div class="state-quote">"Not asking you to be fine. Just asking you to be here. You've managed that."</div>
+    </div>
+    <div class="state-card reveal reveal-delay-2">
+      <span class="state-emoji">🌿</span>
+      <div class="state-name">Fragile</div>
+      <div class="state-companion">With Pebble</div>
+      <div class="state-quote">"We're not doing much today. That's allowed."</div>
+    </div>
+    <div class="state-card reveal reveal-delay-3">
+      <span class="state-emoji">🌤️</span>
+      <div class="state-name">Steady</div>
+      <div class="state-companion">With Colin</div>
+      <div class="state-quote">"Nothing to prove, nothing to survive. Just a day to work through. Nice."</div>
+    </div>
+    <div class="state-card reveal reveal-delay-4">
+      <span class="state-emoji">⚡</span>
+      <div class="state-name">Energised</div>
+      <div class="state-companion">With Crunchy</div>
+      <div class="state-quote">"Real juice today! Channel it. Don't spend it all in one place!"</div>
+    </div>
+    <div class="state-card reveal">
+      <span class="state-emoji">🔥</span>
+      <div class="state-name">Lit Up</div>
+      <div class="state-companion">With Pip</div>
+      <div class="state-quote">"Everything goes in the Voltage Box first. EVERY. SINGLE. ONE."</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section>
+  <p class="section-label reveal">What's inside</p>
+  <h2 class="section-title reveal">A nervous system<br><em>companion.</em></h2>
+  <div class="features-grid">
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">🫙</div>
+      <div class="feature-title">Energy jar</div>
+      <div class="feature-desc">Tasks sized by energy cost, not time. Your jar tells you when you are genuinely full. Adjusts automatically for medication and glucose levels.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Voltage box</div>
+      <div class="feature-desc">On high energy days, every big idea rests here for 48 hours before it becomes a commitment. Your future self will thank you.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <div class="feature-icon">✦</div>
+      <div class="feature-title">Evidence wall</div>
+      <div class="feature-desc">Proof of your capability, saved for the days when you cannot remember it. Not tasks completed. Moments of who you actually are.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">🩸</div>
+      <div class="feature-title">Libre sensor integration</div>
+      <div class="feature-desc">Connect your LibreLinkUp account. Woblii reads your glucose data and adjusts your energy jar before the day begins.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-icon">↩</div>
+      <div class="feature-title">Breadcrumb system</div>
+      <div class="feature-desc">Every task has a return point. When you come back after being interrupted, you know exactly where to start.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <div class="feature-icon">🌙</div>
+      <div class="feature-title">Night mode</div>
+      <div class="feature-desc">For the thoughts that will not stop. A place to put them down and decide tomorrow whether to keep or release them.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRIVACY -->
+<section style="max-width:600px">
+  <p class="section-label reveal">Privacy</p>
+  <h2 class="section-title reveal">Your data is<br><em>yours. Always.</em></h2>
+  <div class="card" style="margin-top:32px" class="reveal">
+    <div class="privacy-row reveal">
+      <span class="privacy-icon">🔒</span>
+      <span class="privacy-text">Everything you tell Woblii stays in your private, encrypted account. We never sell it, share it, or use it for advertising.</span>
+    </div>
+    <div class="privacy-row reveal">
+      <span class="privacy-icon">✉️</span>
+      <span class="privacy-text">Magic link login only. No password to forget, no password to compromise. Just your email and a link.</span>
+    </div>
+    <div class="privacy-row reveal">
+      <span class="privacy-icon">📱</span>
+      <span class="privacy-text">Works on any device. Your data follows you everywhere because it lives in your account, not your browser.</span>
+    </div>
+    <div class="privacy-row reveal">
+      <span class="privacy-icon">🗑️</span>
+      <span class="privacy-text">Delete your account at any time and everything disappears. No retention, no backup copies, no questions asked.</span>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2 class="final-title reveal">Ready to meet<br>your <em>companions?</em></h2>
+  <p class="final-sub reveal">Enter your email. No password. No credit card. Just begin.</p>
+  <div class="reveal">
+    <a href="/app.html" class="btn-hero" style="font-size:1.05rem;padding:18px 44px">Begin for free →</a>
+  </div>
+  <p style="font-size:.75rem;color:var(--text-muted);margin-top:20px" class="reveal">Woblii is free to use. Always.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="/" class="footer-logo">Woblii</a>
+  <p class="footer-note">Built with care for minds that work differently.<br>No ads. No tracking. No pressure.</p>
+  <a href="/app.html" class="footer-link">Sign in →</a>
+</footer>
+
 <script>
-const SUPA_URL='https://wstrdshnfgcjozvdmxwm.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzdHJkc2huZmdjam96dmRteHdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjk1MDMsImV4cCI6MjA5MDY0NTUwM30.PtscVW1srSt9uF6KiB8l1Kv_lmBHz885SdbiDTQGGSY';
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+// NAV scroll behaviour
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>50),{passive:true});
 
-const TODAY=new Date().toISOString().split('T')[0];
-const HOUR=new Date().getHours();
-
-const STATES=[
-  {id:'flat',     emoji:'🌫️',label:'Flat',    jar:6, desc:'Low, numb, or very still today.',  companion:'grumble'},
-  {id:'fragile',  emoji:'🌿',label:'Fragile', jar:9, desc:'Tender. Manageable but careful.',  companion:'pebble'},
-  {id:'steady',   emoji:'🌤️',label:'Steady',  jar:15,desc:'Present, grounded, and ready.',    companion:'colin'},
-  {id:'energised',emoji:'⚡',label:'Energised',jar:20,desc:'Real energy. Use it well.',        companion:'crunchy'},
-  {id:'lit-up',   emoji:'🔥',label:'Lit Up',  jar:20,desc:'Bright and fast. Containment on.', companion:'pip',containment:true}
-];
-const SIZES=[
-  {id:'tiny', label:'Tiny', drops:1,desc:'< 5 min'},
-  {id:'small',label:'Small',drops:2,desc:'< 15 min'},
-  {id:'medium',label:'Medium',drops:3,desc:'< 45 min'},
-  {id:'heavy',label:'Heavy',drops:5,desc:'1 hr+'}
-];
-const GROUNDING=[
-  {title:'Five senses',body:'Name five things you can physically feel right now. The weight of the chair. The temperature of your hands. The texture beneath you. The air on your skin. Your feet on the floor. Take thirty seconds.'},
-  {title:'Three breaths',body:'In for four counts, hold for two, out for six. Three times. Your nervous system needs to know it\'s safe to think.'},
-  {title:'Body scan',body:'Top of your head down to your feet. Notice tension without trying to fix it. Jaw. Shoulders. Chest. Hands. Ten seconds each.'},
-  {title:'Place your feet',body:'Both feet flat on the floor. Press down gently. You are in a specific place. The ground is holding you. Stay with that for thirty seconds.'}
-];
-
-const MSG={
-  grumble:{
-    open:{
-      flat:["Aye. It's that kind of day. <strong>We're not pretending otherwise.</strong>","Here we are then. Terrible situation, existence. <strong>We'll sit with it.</strong>","Not asking you to be fine. <strong>Just asking you to be here.</strong> You've managed that."],
-      fragile:["Careful one today. <strong>We go slowly. No sudden moves.</strong>","Tender day. That's allowed. <strong>We take what we need and no more.</strong>"]
-    },
-    taskDone:["Hmph. <strong>Fine.</strong> That worked then.","Well. <strong>Look at that.</strong> It's done.","Grudgingly impressed. <strong>Not that I'll say that twice.</strong>"],
-    ortDone:["Well. I didn't think you had it in you. <strong>I was wrong. That's annoying.</strong>","Hmph. <strong>That'll do.</strong> The day is a success whether you believe it or not."],
-    overJar:"<strong>That's plenty.</strong> Not a single drop more today.",
-    stateCheck:{flat:"Aye. <strong>I know.</strong> We don't have to fix it today.",fragile:"Careful day. <strong>I'll keep the pace gentle.</strong>"},
-    return:"You came back. <strong>Good.</strong> I wasn't worried. Mostly.",
-    medMissed:"Missed medication explains a lot. <strong>We factor that in and go easier today.</strong>",
-    glucoseLow:"Blood sugar is low. <strong>That's not a mood problem. That's a fuel problem. Eat first.</strong>",
-    glucoseHigh:"High reading overnight. <strong>The body works hard on that. Be patient with yourself today.</strong>"
-  },
-  pebble:{
-    open:{
-      fragile:["We're not doing much today. <strong>That's allowed.</strong>","Fragile days have their own kind of strength. <strong>Just being here is enough.</strong>","Quiet day. <strong>We hold space and go gently.</strong>","Still. Soft. <strong>You don't have to do anything you're not ready for.</strong>"]
-    },
-    taskDone:["Good. <strong>That was enough.</strong>","<strong>That counts.</strong> Well done.","One small thing done. <strong>That matters more than you know.</strong>"],
-    ortDone:["That's the one. <strong>The day is complete.</strong> Rest now if you need to.","<strong>That was everything.</strong> You did it."],
-    overJar:"<strong>Too much.</strong> The jar knows. Trust it.",
-    stateCheck:{fragile:"<strong>I'm here.</strong> We go at your pace. No rushing."},
-    return:"You came back. <strong>That's the whole thing.</strong> Well done.",
-    medMissed:"That context helps. <strong>We adjust and go gently.</strong>",
-    glucoseLow:"<strong>Blood sugar is low.</strong> Something to eat before anything else.",
-    glucoseHigh:"<strong>High overnight reading.</strong> Your body has been working. Be soft with yourself."
-  },
-  colin:{
-    open:{
-      steady:["Steady day. <strong>That's actually the best kind.</strong> Let's use it well.","You're grounded today. <strong>That's more valuable than it sounds.</strong>","Calm and present. <strong>This is where good work happens.</strong>","Nothing to prove, nothing to survive. <strong>Just a day to work through.</strong> Nice."]
-    },
-    taskDone:["Good. <strong>Efficient.</strong>","That's the one. <strong>Nicely done.</strong>","<strong>Sorted.</strong> On to the next."],
-    ortDone:["<strong>Sorted.</strong> The day is complete. Everything else is a bonus.","That's everything it needed to be. <strong>Well done.</strong>"],
-    overJar:"Aye, maybe not though. <strong>The jar knows.</strong>",
-    stateCheck:{steady:"Steady is the one. <strong>This is a good place to work from.</strong>"},
-    return:"Good to have you back. <strong>Steady as we go.</strong>",
-    medMissed:"Good to know. <strong>We'll keep today manageable.</strong>",
-    glucoseLow:"<strong>Glucose is a bit low.</strong> Worth eating before we start.",
-    glucoseHigh:"<strong>Overnight reading was high.</strong> Not unusual. We go steady regardless."
-  },
-  crunchy:{
-    open:{
-      energised:["Big energy day! Let's be <strong>smart</strong> wi' it, aye? One thing at a time!","Ooh look at you, absolutely <strong>crackin'!</strong> Save some for tomorrow's you though!","Real juice today! Channel it. <strong>Don't spend it all in one place!</strong>"],
-      'lit-up':["Right, I <strong>SEE YOU.</strong> Voltage Box first. Every idea. No exceptions. Trust the process!","You feel incredible and that is <strong>completely real!</strong> 48 hours on every big idea. Promise."]
-    },
-    taskDone:["YESSS! That's the one! 🎉","Crunch! <strong>Nailed it!</strong>","<strong>Belter!</strong> Absolutely belter!","YES! You absolute <strong>legend!</strong>"],
-    ortDone:["The one real thing. <strong>DONE.</strong> The whole day counts. So proud of you!","That's it. That's <strong>everything.</strong> Day is a success. Full stop!"],
-    overJar:"<strong>Whoa whoa whoa!</strong> The jar is overflowing! Put something back!",
-    voltage:"Good. It'll be there when the 48 hours is up. <strong>Trust the box.</strong>",
-    stateCheck:{energised:"Aye that's the spirit! Let's be <strong>clever</strong> wi' this energy!"},
-    return:"You're back! <strong>Absolutely delighted to see you!</strong> Let's go.",
-    medMissed:"Noted! <strong>We adjust the plan and look after the energy.</strong>",
-    glucoseLow:"Oh! <strong>Blood sugar is low!</strong> Eat something quick before we do anything else!",
-    glucoseHigh:"High overnight reading. <strong>Be smart with the energy today, it might dip.</strong>"
-  },
-  pip:{
-    open:{
-      'lit-up':["EVERYTHING IS POSSIBLE RIGHT NOW. <strong>Write it ALL in the Voltage Box. ALL of it. GO GO GO.</strong>","Oh we are ABSOLUTELY ON today! <strong>Box first. THEN we move.</strong> Don't skip the box!","I am FIZZING. You are FIZZING. <strong>48 hours on every idea. Every single one. LET'S GO.</strong>"]
-    },
-    taskDone:["YES YES YES! <strong>DONE! NEXT!</strong>","INCREDIBLE! <strong>Absolutely on fire!</strong>","<strong>BOOM.</strong> That's what we do!","<strong>MAGNIFICENT!</strong> Keep going!"],
-    ortDone:["THE ONE REAL THING! <strong>DONE! THE DAY IS A SUCCESS!</strong> I am beside myself!","WE DID IT! <strong>Everything else is a BONUS from here!</strong>"],
-    overJar:"<strong>TOO MUCH! THE JAR KNOWS!</strong> Put it in the Voltage Box instead!",
-    voltage:"PERFECT. <strong>In the box it goes.</strong> 48 hours. Trust the process!",
-    stateCheck:{'lit-up':"OH WOW OH WOW! <strong>THIS IS A LIT UP DAY!</strong> Voltage Box. Always Voltage Box first!"},
-    return:"YOU'RE BACK! <strong>I MISSED YOU SO MUCH!</strong> Let's absolutely go!",
-    medMissed:"Noted! <strong>Channel the energy even more carefully today!</strong>",
-    glucoseLow:"WAIT! <strong>Blood sugar is low!</strong> EAT FIRST. Then we absolutely go.",
-    glucoseHigh:"High overnight reading! <strong>Eat well, stay hydrated, THEN we fizz!</strong>"
-  }
-};
-function rnd(a){return a[Math.floor(Math.random()*a.length)]}
-
-// ================================================================
-// SVG CHARACTERS
-// ================================================================
-function svgGrumble(w){return`<svg viewBox="0 0 100 150" width="${w}" height="${Math.round(w*1.5)}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
-<ellipse cx="50" cy="147" rx="22" ry="5" fill="rgba(0,0,0,.32)"/>
-<rect x="30" y="108" width="14" height="22" rx="7" fill="#4a3060"/>
-<ellipse cx="35" cy="131" rx="10" ry="5.5" fill="#2a1840"/>
-<rect x="56" y="108" width="14" height="22" rx="7" fill="#4a3060"/>
-<ellipse cx="65" cy="131" rx="10" ry="5.5" fill="#2a1840"/>
-<path d="M22,72 Q16,80 20,90 Q26,96 36,92" stroke="#5a4070" stroke-width="9" fill="none" stroke-linecap="round"/>
-<path d="M78,72 Q84,80 80,90 Q74,96 64,92" stroke="#5a4070" stroke-width="9" fill="none" stroke-linecap="round"/>
-<path d="M22,78 Q38,85 50,82 Q62,80 78,78" stroke="#5a4070" stroke-width="8" fill="none" stroke-linecap="round"/>
-<path d="M50,18 C70,16 86,30 88,52 C90,70 84,92 72,104 C62,114 38,114 28,104 C16,92 10,70 12,52 C14,30 30,16 50,18Z" fill="#6a508a" stroke="#5a4070" stroke-width="1.5"/>
-<rect x="40" y="100" width="20" height="10" rx="3" fill="#4a3060"/><rect x="44" y="102" width="12" height="6" rx="2" fill="#c9a84c" opacity=".6"/>
-<path d="M28,28 Q30,10 50,8 Q70,10 72,28Z" fill="#3a2858"/>
-<rect x="22" y="26" width="56" height="8" rx="4" fill="#4a3868"/><rect x="22" y="30" width="56" height="3" rx="1.5" fill="#c9a84c" opacity=".5"/>
-<path d="M22,55 Q18,70 20,85 Q25,105 50,108 Q75,105 80,85 Q82,70 78,55Z" fill="#d8d0e8" stroke="#b8b0c8" stroke-width="1"/>
-<path d="M30,62 Q28,75 30,85 Q35,98 50,102" stroke="#b8b0c8" stroke-width="1" fill="none" opacity=".5"/>
-<path d="M70,62 Q72,75 70,85 Q65,98 50,102" stroke="#b8b0c8" stroke-width="1" fill="none" opacity=".5"/>
-<path d="M28,42 Q28,58 50,60 Q72,58 72,42 Q72,28 50,26 Q28,28 28,42Z" fill="#8a7098"/>
-<path d="M32,37 Q38,33 44,36" stroke="#2a1840" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<path d="M56,36 Q62,33 68,37" stroke="#2a1840" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<g class="grumble-eyes">
-<circle cx="39" cy="43" r="6.5" fill="white"/><circle cx="61" cy="43" r="6.5" fill="white"/>
-<circle cx="40" cy="44" r="4" fill="#2a1840"/><circle cx="62" cy="44" r="4" fill="#2a1840"/>
-<circle cx="41.5" cy="42.5" r="1.4" fill="white"/><circle cx="63.5" cy="42.5" r="1.4" fill="white"/>
-</g>
-<ellipse cx="50" cy="50" rx="4" ry="3" fill="#7a6088"/>
-<path d="M41,57 Q50,55 59,57" stroke="#2a1840" stroke-width="2" fill="none" stroke-linecap="round"/>
-<path d="M41,57 Q39,58.5 40,60" stroke="#2a1840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-<path d="M59,57 Q61,58.5 60,60" stroke="#2a1840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-<ellipse cx="30" cy="52" rx="5.5" ry="3.5" fill="#cc8899" opacity=".22"/><ellipse cx="70" cy="52" rx="5.5" ry="3.5" fill="#cc8899" opacity=".22"/>
-</svg>`}
-
-function svgPebble(w){return`<svg viewBox="0 0 120 120" width="${w}" height="${w}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
-<ellipse cx="60" cy="117" rx="24" ry="5.5" fill="rgba(0,0,0,.28)"/>
-<!-- Legs -->
-<line x1="48" y1="100" x2="42" y2="115" stroke="#7a7a9a" stroke-width="5" stroke-linecap="round"/>
-<ellipse cx="40" cy="116" rx="8" ry="3.5" fill="#7a7a9a" transform="rotate(-8,40,116)"/>
-<line x1="72" y1="100" x2="78" y2="115" stroke="#7a7a9a" stroke-width="5" stroke-linecap="round"/>
-<ellipse cx="80" cy="116" rx="8" ry="3.5" fill="#7a7a9a" transform="rotate(8,80,116)"/>
-<!-- Arms (very short, almost no arms — just little nubs) -->
-<line x1="22" y1="68" x2="14" y2="80" stroke="#7a7a9a" stroke-width="4.5" stroke-linecap="round"/>
-<circle cx="13" cy="82" r="4" fill="#7a7a9a"/>
-<line x1="98" y1="68" x2="106" y2="80" stroke="#7a7a9a" stroke-width="4.5" stroke-linecap="round"/>
-<circle cx="107" cy="82" r="4" fill="#7a7a9a"/>
-<!-- Body: smooth rounded pebble shape -->
-<path d="M60,10 C88,10 108,30 108,58 C108,86 88,106 60,108 C32,106 12,86 12,58 C12,30 32,10 60,10Z" fill="#9898b8" stroke="#8080a0" stroke-width="1.5"/>
-<!-- Highlight -->
-<path d="M38,18 C50,12 76,18 84,32 C86,38 82,42 78,38 C68,28 48,22 36,24 C30,25 30,20 38,18Z" fill="rgba(255,255,255,.18)"/>
-<!-- Subtle texture lines -->
-<path d="M32,55 Q36,48 44,52" stroke="rgba(255,255,255,.1)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-<path d="M76,42 Q82,46 80,54" stroke="rgba(255,255,255,.1)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-<!-- Eyes (soft, half-lidded, calm) -->
-<circle cx="46" cy="56" r="9" fill="white"/>
-<circle cx="74" cy="56" r="9" fill="white"/>
-<!-- Heavy eyelids — the sleepy calm look -->
-<path d="M37,53 Q46,48 55,53" fill="#9898b8" stroke="none"/>
-<path d="M65,53 Q74,48 83,53" fill="#9898b8" stroke="none"/>
-<circle cx="47" cy="58" r="5" fill="#2a2840"/>
-<circle cx="75" cy="58" r="5" fill="#2a2840"/>
-<circle cx="49" cy="56" r="1.8" fill="white"/>
-<circle cx="77" cy="56" r="1.8" fill="white"/>
-<!-- Cheeks (very subtle) -->
-<ellipse cx="35" cy="67" rx="7" ry="4" fill="#aaaacc" opacity=".25"/>
-<ellipse cx="85" cy="67" rx="7" ry="4" fill="#aaaacc" opacity=".25"/>
-<!-- Mouth: small gentle curve, not quite a smile not quite not -->
-<path d="M50,70 Q60,74 70,70" stroke="#2a2840" stroke-width="2" fill="none" stroke-linecap="round"/>
-</svg>`}
-
-function svgColin(w){return`<svg viewBox="0 0 80 160" width="${w}" height="${Math.round(w*2)}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
-<ellipse cx="40" cy="157" rx="16" ry="4" fill="rgba(0,0,0,.3)"/>
-<line x1="33" y1="128" x2="28" y2="150" stroke="#2d6e30" stroke-width="5" stroke-linecap="round"/>
-<ellipse cx="26" cy="151" rx="7" ry="3.5" fill="#2d6e30" transform="rotate(-10,26,151)"/>
-<line x1="47" y1="128" x2="52" y2="150" stroke="#2d6e30" stroke-width="5" stroke-linecap="round"/>
-<ellipse cx="54" cy="151" rx="7" ry="3.5" fill="#2d6e30" transform="rotate(10,54,151)"/>
-<line x1="16" y1="72" x2="5" y2="92" stroke="#2d6e30" stroke-width="5" stroke-linecap="round"/><circle cx="4" cy="94" r="4.5" fill="#2d6e30"/>
-<line x1="64" y1="72" x2="74" y2="90" stroke="#2d6e30" stroke-width="5" stroke-linecap="round"/><circle cx="75" cy="92" r="4.5" fill="#2d6e30"/>
-<path d="M40,12 C58,12 68,28 68,60 C68,95 60,125 40,132 C20,125 12,95 12,60 C12,28 22,12 40,12Z" fill="#4aaa4a" stroke="#368036" stroke-width="1.5"/>
-<path d="M26,18 C32,14 50,20 56,32 C58,36 55,40 52,37 C44,28 30,22 24,24 C20,25 20,20 26,18Z" fill="rgba(255,255,255,.2)"/>
-<circle cx="34" cy="48" r="2" fill="#368036" opacity=".35"/><circle cx="48" cy="55" r="2" fill="#368036" opacity=".32"/>
-<path d="M38,12 Q36,4 40,2 Q44,4 42,12" fill="#2d6e30" stroke="#1e5020" stroke-width="1"/>
-<ellipse cx="40" cy="44" rx="18" ry="20" fill="#5cc05c" opacity=".6"/>
-<rect x="22" y="34" width="15" height="10" rx="4" fill="#1a2a3a" stroke="#0d1820" stroke-width="1"/>
-<rect x="43" y="34" width="15" height="10" rx="4" fill="#1a2a3a" stroke="#0d1820" stroke-width="1"/>
-<line x1="37" y1="39" x2="43" y2="39" stroke="#0d1820" stroke-width="1.5" stroke-linecap="round"/>
-<line x1="22" y1="39" x2="15" y2="40" stroke="#0d1820" stroke-width="1.5" stroke-linecap="round"/>
-<line x1="58" y1="39" x2="65" y2="40" stroke="#0d1820" stroke-width="1.5" stroke-linecap="round"/>
-<rect x="22" y="34" width="15" height="10" rx="4" fill="rgba(80,130,200,.12)"/>
-<rect x="43" y="34" width="15" height="10" rx="4" fill="rgba(80,130,200,.12)"/>
-<path d="M25,36 Q28,35 30,37" stroke="rgba(100,160,255,.4)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-<path d="M46,36 Q49,35 51,37" stroke="rgba(100,160,255,.4)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-<ellipse cx="22" cy="50" rx="5" ry="3.5" fill="#88cc88" opacity=".4"/><ellipse cx="58" cy="50" rx="5" ry="3.5" fill="#88cc88" opacity=".4"/>
-<path d="M33,55 Q40,59 47,55" stroke="#1e5020" stroke-width="2" fill="none" stroke-linecap="round"/>
-</svg>`}
-
-function svgCrunchy(w){return`<svg viewBox="0 0 110 132" width="${w}" height="${Math.round(w*1.2)}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
-<ellipse cx="55" cy="128" rx="20" ry="5" fill="rgba(0,0,0,.28)"/>
-<line x1="42" y1="100" x2="33" y2="120" stroke="#bf8c08" stroke-width="3.8" stroke-linecap="round"/>
-<ellipse cx="30" cy="122" rx="7" ry="3.5" fill="#bf8c08" transform="rotate(-8,30,122)"/>
-<line x1="64" y1="100" x2="73" y2="120" stroke="#bf8c08" stroke-width="3.8" stroke-linecap="round"/>
-<ellipse cx="76" cy="122" rx="7" ry="3.5" fill="#bf8c08" transform="rotate(8,76,122)"/>
-<g class="crunchy-arm-wave"><line x1="20" y1="54" x2="4" y2="37" stroke="#bf8c08" stroke-width="3.8" stroke-linecap="round"/><circle cx="2" cy="33.5" r="5" fill="#bf8c08"/></g>
-<line x1="89" y1="56" x2="105" y2="40" stroke="#bf8c08" stroke-width="3.8" stroke-linecap="round"/><circle cx="107" cy="37" r="5" fill="#bf8c08"/>
-<path d="M55,8 C73,4 94,17 95,38 C97,57 89,77 79,88 C68,99 50,105 36,98 C21,91 9,76 9,58 C9,38 21,13 44,8Z" fill="#F6C918" stroke="#d4a510" stroke-width="1.5"/>
-<path d="M43,13 C56,9 73,18 78,33 C80,38 77,42 73,39 C62,31 48,22 39,22 C35,22 33,16 43,13Z" fill="rgba(255,255,255,.22)"/>
-<circle cx="46" cy="61" r="2.5" fill="#a05010" opacity=".33"/>
-<circle cx="43" cy="52" r="9" fill="white"/><circle cx="64" cy="49" r="9" fill="white"/>
-<circle cx="44" cy="53" r="5.5" fill="#180e00"/><circle cx="65" cy="50" r="5.5" fill="#180e00"/>
-<circle cx="46" cy="51" r="2" fill="white"/><circle cx="67" cy="48" r="2" fill="white"/>
-<ellipse cx="30" cy="65" rx="7" ry="4.5" fill="#ff9999" opacity=".36"/><ellipse cx="75" cy="62" rx="7" ry="4.5" fill="#ff9999" opacity=".36"/>
-<path d="M36,71 Q53,87 71,70" stroke="#180e00" stroke-width="3" fill="none" stroke-linecap="round"/>
-<circle cx="36" cy="71" r="2" fill="#180e00"/><circle cx="71" cy="70" r="2" fill="#180e00"/>
-</svg>`}
-
-function svgPip(w){return`<svg viewBox="0 0 90 110" width="${w}" height="${Math.round(w*1.22)}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
-<ellipse cx="45" cy="107" rx="18" ry="4.5" fill="rgba(0,0,0,.3)"/>
-<!-- Glow -->
-<ellipse cx="45" cy="55" rx="38" ry="42" fill="rgba(255,120,30,.08)"/>
-<!-- Legs (stubby and energetic) -->
-<line x1="37" y1="88" x2="30" y2="104" stroke="#cc5010" stroke-width="4.5" stroke-linecap="round"/>
-<ellipse cx="28" cy="105" rx="7" ry="3.2" fill="#cc5010" transform="rotate(-12,28,105)"/>
-<line x1="53" y1="88" x2="60" y2="104" stroke="#cc5010" stroke-width="4.5" stroke-linecap="round"/>
-<ellipse cx="62" cy="105" rx="7" ry="3.2" fill="#cc5010" transform="rotate(12,62,105)"/>
-<!-- Arms (flung wide, absolutely enthusiastic) -->
-<line x1="18" y1="52" x2="2" y2="36" stroke="#cc5010" stroke-width="4" stroke-linecap="round"/>
-<circle cx="1" cy="34" r="4.5" fill="#cc5010"/>
-<line x1="72" y1="52" x2="88" y2="36" stroke="#cc5010" stroke-width="4" stroke-linecap="round"/>
-<circle cx="89" cy="34" r="4.5" fill="#cc5010"/>
-<!-- Flame body -->
-<path d="M45,5 C55,2 70,12 72,28 C75,45 68,70 55,82 C50,86 40,86 35,82 C22,70 15,45 18,28 C20,12 35,2 45,5Z" fill="#ff7020" stroke="#dd5010" stroke-width="1.5"/>
-<!-- Inner flame highlight -->
-<path d="M45,10 C52,8 62,16 64,28 C65,38 60,55 52,66 C50,68 46,70 44,68 C36,58 30,40 32,28 C34,16 38,10 45,10Z" fill="#ffaa40" opacity=".6"/>
-<!-- Core bright centre -->
-<path d="M45,18 C49,16 56,22 56,32 C56,42 50,54 45,58 C40,54 34,42 34,32 C34,22 41,16 45,18Z" fill="#ffe060" opacity=".5"/>
-<!-- Spark bits flying off -->
-<circle cx="72" cy="20" r="3.5" fill="#ffb030" opacity=".8"/>
-<circle cx="78" cy="35" r="2.5" fill="#ff8030" opacity=".7"/>
-<circle cx="15" cy="22" r="3" fill="#ffb030" opacity=".75"/>
-<circle cx="10" cy="40" r="2" fill="#ff8030" opacity=".65"/>
-<circle cx="68" cy="8" r="2" fill="#ffcc40" opacity=".6"/>
-<circle cx="20" cy="10" r="2.5" fill="#ffcc40" opacity=".6"/>
-<!-- Eyes (wide, absolutely manic with joy) -->
-<circle cx="38" cy="44" r="9.5" fill="white"/>
-<circle cx="52" cy="44" r="9.5" fill="white"/>
-<circle cx="39" cy="45" r="6" fill="#1a0800"/>
-<circle cx="53" cy="45" r="6" fill="#1a0800"/>
-<circle cx="41" cy="43" r="2.2" fill="white"/>
-<circle cx="55" cy="43" r="2.2" fill="white"/>
-<!-- Extra star shine in eyes -->
-<circle cx="37" cy="47" r="1" fill="white" opacity=".6"/>
-<circle cx="51" cy="47" r="1" fill="white" opacity=".6"/>
-<!-- Cheeks (bright orange) -->
-<ellipse cx="28" cy="52" rx="6" ry="4" fill="#ff8844" opacity=".5"/>
-<ellipse cx="62" cy="52" rx="6" ry="4" fill="#ff8844" opacity=".5"/>
-<!-- Mouth (huge delighted grin) -->
-<path d="M32,60 Q45,74 58,60" stroke="#1a0800" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<circle cx="32" cy="60" r="2.5" fill="#1a0800"/>
-<circle cx="58" cy="60" r="2.5" fill="#1a0800"/>
-<!-- Little tongue of enthusiasm -->
-<path d="M40,68 Q45,74 50,68" fill="#ff4444" stroke="none"/>
-</svg>`}
-
-// ================================================================
-// COMPANION CONFIG
-// ================================================================
-const COMP_CFG={
-  grumble:{cls:'grumble-card',wrap:'grumble-svg-wrap',name:'Grumble',svg:svgGrumble,sz:68,miniSz:42,bg:'rgba(130,120,180,.06)',bd:'rgba(140,130,190,.18)',cl:'#b8b0d8'},
-  pebble: {cls:'pebble-card', wrap:'pebble-svg-wrap', name:'Pebble', svg:svgPebble, sz:72,miniSz:44,bg:'rgba(150,150,180,.06)',bd:'rgba(160,160,190,.16)',cl:'#c0c0d8'},
-  colin:  {cls:'colin-card',  wrap:'colin-svg-wrap',  name:'Colin',  svg:svgColin,  sz:52,miniSz:34,bg:'rgba(74,160,80,.06)', bd:'rgba(90,180,90,.18)', cl:'#a0cc90'},
-  crunchy:{cls:'crunchy-card',wrap:'crunchy-svg-wrap',name:'Crunchy',svg:svgCrunchy,sz:68,miniSz:40,bg:'rgba(245,197,24,.06)',bd:'rgba(245,197,24,.18)',cl:'#e8c840'},
-  pip:    {cls:'pip-card',    wrap:'pip-svg-wrap',    name:'Pip',    svg:svgPip,    sz:62,miniSz:38,bg:'rgba(255,100,30,.06)',bd:'rgba(255,120,40,.2)', cl:'#ffb060'}
-};
-
-function compCard(type,pool){
-  const c=COMP_CFG[type];if(!c)return'';
-  const msg=rnd(pool);
-  return`<div class="companion-card ${c.cls}" id="companion-card">
-    <div class="companion-figure"><div class="${c.wrap}">${c.svg(c.sz)}</div><div class="companion-name">${c.name}</div></div>
-    <div class="companion-bubble" id="companion-bubble"><p>${msg}</p></div>
-  </div>`;
-}
-function compMini(type,msg){
-  const c=COMP_CFG[type];if(!c)return'';
-  return`<div class="companion-mini" style="background:${c.bg};border:1px solid ${c.bd}">
-    <div style="flex-shrink:0">${c.svg(c.miniSz)}</div>
-    <p style="font-size:.81rem;color:${c.cl};line-height:1.42">${msg}</p>
-  </div>`;
-}
-function updateBubble(msg){
-  const b=document.querySelector('#companion-bubble p');if(!b)return;
-  b.innerHTML=msg;
-  const w=document.getElementById('companion-bubble');
-  if(w){w.style.animation='none';w.offsetHeight;w.style.animation='bubblePop .38s cubic-bezier(.34,1.56,.64,1) both'}
-}
-function getMsgPool(type,state){
-  return MSG[type]?.open?.[state]||MSG[type]?.open?.steady||MSG[type]?.open?.flat||MSG[type]?.open?.fragile||MSG[type]?.open?.energised||MSG[type]?.open?.['lit-up']||['Hello.'];
-}
-
-// ================================================================
-// APP STATE
-// ================================================================
-let currentUser=null,todayData=null,evidenceItems=[],userPrefs=null;
-let glucoseData=null;
-let tmp={state:'',body:{},size:'small'};
-let pendingEmail='',middayNew='',saveTimer=null,syncing=false;
-
-function freshToday(){return{date:TODAY,state:'',body:{},oneRealThing:'',ortDone:false,tasks:[],voltageBox:[],close:null}}
-
-// ================================================================
-// SUPABASE DATA
-// ================================================================
-async function dbLoadToday(){
-  const{data}=await sb.from('daily_entries').select('*').eq('date',TODAY).maybeSingle();
-  return data;
-}
-async function dbSaveToday(){
-  if(!currentUser||!todayData)return;
-  syncing=true;setSyncDot(true);
-  await sb.from('daily_entries').upsert({
-    user_id:currentUser.id,date:TODAY,
-    state:todayData.state,body:todayData.body,
-    one_real_thing:todayData.oneRealThing,ort_done:todayData.ortDone,
-    tasks:todayData.tasks,voltage_box:todayData.voltageBox,close:todayData.close
-  },{onConflict:'user_id,date'});
-  syncing=false;setSyncDot(false);
-}
-async function dbLoadEvidence(){
-  const{data}=await sb.from('evidence_wall').select('*').order('created_at',{ascending:false});
-  return data||[];
-}
-async function dbAddEvidence(text,date){
-  const{data}=await sb.from('evidence_wall').insert({user_id:currentUser.id,text,entry_date:date}).select().single();
-  return data;
-}
-async function dbDeleteEvidence(id){await sb.from('evidence_wall').delete().eq('id',id)}
-async function dbLoadPrefs(){
-  const{data}=await sb.from('user_preferences').select('*').eq('user_id',currentUser.id).maybeSingle();
-  return data;
-}
-async function dbSavePrefs(prefs){
-  await sb.from('user_preferences').upsert({user_id:currentUser.id,...prefs},{onConflict:'user_id'});
-}
-async function dbGetLastDate(){
-  const{data}=await sb.from('daily_entries').select('date').lt('date',TODAY).order('date',{ascending:false}).limit(1).maybeSingle();
-  return data?.date||null;
-}
-function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(dbSaveToday,700)}
-function setSyncDot(a){const d=document.querySelector('.sync-dot');if(d)d.classList.toggle('syncing',a)}
-
-// ================================================================
-// LIBRE GLUCOSE
-// ================================================================
-async function fetchGlucose(){
-  if(!userPrefs?.libre_email||!userPrefs?.libre_password)return null;
-  try{
-    // Login to LibreLinkUp
-    const loginRes=await fetch('https://api.libreview.io/llu/auth/login',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','version':'4.7.0','product':'llu.android'},
-      body:JSON.stringify({email:userPrefs.libre_email,password:userPrefs.libre_password})
-    });
-    const loginData=await loginRes.json();
-    const token=loginData?.data?.authTicket?.token;
-    if(!token)return null;
-    // Get connections
-    const connRes=await fetch('https://api.libreview.io/llu/connections',{
-      headers:{'Authorization':`Bearer ${token}`,'version':'4.7.0','product':'llu.android'}
-    });
-    const connData=await connRes.json();
-    const conn=connData?.data?.[0];
-    if(!conn)return null;
-    const reading=conn.glucoseMeasurement;
-    return{
-      value:reading?.ValueInMgPerDl,
-      valueMmol:(reading?.ValueInMgPerDl/18).toFixed(1),
-      trend:reading?.TrendArrow,
-      timestamp:reading?.Timestamp,
-      patientName:conn.firstName
-    };
-  }catch(e){console.log('Libre fetch:',e);return null}
-}
-function glucoseInsight(g){
-  if(!g||!g.valueMmol)return null;
-  const v=parseFloat(g.valueMmol);
-  if(v<4.0)return{level:'low',msg:`${g.patientName||'Sensor'} reading: ${g.valueMmol} mmol/L — <strong>low.</strong> Eat something before anything else.`,jarAdjust:-3}
-  if(v>10.0)return{level:'high',msg:`${g.patientName||'Sensor'} reading: ${g.valueMmol} mmol/L — <strong>elevated overnight.</strong> The body has been working hard.`,jarAdjust:-2}
-  return{level:'normal',msg:`${g.patientName||'Sensor'} reading: ${g.valueMmol} mmol/L — <strong>in range.</strong> Good start.`,jarAdjust:0}
-}
-
-// ================================================================
-// LOAD USER DATA
-// ================================================================
-async function loadUserData(){
-  const[row,ev,prefs]=await Promise.all([dbLoadToday(),dbLoadEvidence(),dbLoadPrefs()]);
-  todayData=row?{
-    date:row.date,state:row.state||'',body:row.body||{},
-    oneRealThing:row.one_real_thing||'',ortDone:row.ort_done||false,
-    tasks:row.tasks||[],voltageBox:row.voltage_box||[],close:row.close||null
-  }:freshToday();
-  evidenceItems=ev;
-  userPrefs=prefs||{};
-  // Fetch glucose in background
-  if(userPrefs.libre_email){
-    fetchGlucose().then(g=>{glucoseData=g});
-  }
-  if(todayData.state){document.body.dataset.state=todayData.state;go('day');return}
-  const lastDate=await dbGetLastDate();
-  if(lastDate){
-    const days=Math.floor((new Date(TODAY)-new Date(lastDate))/(86400000));
-    if(days>=3){go('return');return}
-  }
-  go('welcome');
-}
-
-// ================================================================
-// ROUTER
-// ================================================================
-function go(s){
-  const app=document.getElementById('app');
-  const map={
-    loading:rLoading,signin:rSignin,'email-sent':rEmailSent,
-    welcome:rWelcome,return:rReturn,
-    'state-check':rStateCheck,'body-check':rBodyCheck,
-    regulation:rRegulation,day:rDay,
-    evidence:rEvidence,'close-day':rCloseDay,
-    night:rNight,done:rDone,settings:rSettings
-  };
-  if(!map[s])return;
-  app.innerHTML=map[s]();
-  document.body.dataset.state=todayData?.state||'steady';
-  requestAnimationFrame(()=>{
-    const el=app.querySelector('.screen,.night-screen,.reg-screen,.auth-screen');
-    if(el){el.style.display='flex';el.classList.add('fade-in')}
-  });
-  bind();
-}
-function toast(m,d=2400){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
-function bind(){
-  document.querySelectorAll('input[type=text],input[type=email],input[type=password]').forEach(i=>{
-    i.addEventListener('keydown',e=>{
-      if(e.key!=='Enter')return;
-      if(i.id==='email-input')sendMagicLink();
-      if(i.id==='ri')completeReturn();
-      if(i.id==='ti')addTask();
-      if(i.id==='ei')addEvidence();
-      if(i.id==='vi')addVoltage();
-    });
-  });
-}
-
-// ================================================================
-// AUTH
-// ================================================================
-async function sendMagicLink(){
-  const el=document.getElementById('email-input');
-  const email=el?.value?.trim();
-  if(!email||!email.includes('@')){toast('Please enter a valid email address');return}
-  pendingEmail=email;el.disabled=true;
-  document.getElementById('send-btn').textContent='Sending...';
-  const{error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href}});
-  if(error){toast('Something went wrong. Please try again.');el.disabled=false;document.getElementById('send-btn').textContent='Send me a link →';return}
-  go('email-sent');
-}
-async function signOut(){
-  await sb.auth.signOut();
-  currentUser=null;todayData=null;evidenceItems=[];userPrefs=null;glucoseData=null;
-  go('signin');
-}
-
-// ================================================================
-// SCREENS
-// ================================================================
-function rLoading(){return`<div class="auth-screen" style="display:flex"><div class="auth-inner"><div class="logo">Woblii</div><div class="breathe-circle">···</div></div></div>`}
-
-function rSignin(){return`<div class="auth-screen" style="display:flex">
-  <div class="auth-inner">
-    <div class="logo">Woblii</div>
-    <div class="display" style="margin-bottom:14px;font-size:2.2rem">Begin.</div>
-    <p class="body-text" style="margin-bottom:36px;font-size:.9rem">Your companion for every kind of day.<br>Enter your email and we'll send you a link.</p>
-    <input type="email" class="text-input" id="email-input" placeholder="your@email.com" style="text-align:center" autocomplete="email">
-    <div class="gap"></div>
-    <button class="btn btn-primary btn-full" id="send-btn" onclick="sendMagicLink()">Send me a link →</button>
-    <div class="auth-divider">no password required</div>
-    <p class="muted" style="font-size:.75rem;line-height:1.6">We send a magic link to your inbox.<br>Click it and you're in. Works on any device.</p>
-  </div>
-</div>`}
-
-function rEmailSent(){return`<div class="auth-screen" style="display:flex">
-  <div class="auth-inner">
-    <div class="logo">Woblii</div>
-    <div class="display" style="margin-bottom:18px;font-size:2rem">Check your email.</div>
-    <div class="card" style="text-align:center">
-      <p class="muted" style="font-size:.78rem;margin-bottom:6px">We've sent a link to</p>
-      <p style="font-family:var(--font-d);font-size:1.1rem;color:var(--accent);margin:8px 0">${pendingEmail}</p>
-      <p class="muted" style="font-size:.75rem;margin-top:6px">Click it to open Woblii.</p>
-    </div>
-    <p class="body-text" style="font-size:.84rem;margin:20px 0;opacity:.7">You can close this tab once you've clicked the link.</p>
-    <div class="gap-lg"></div>
-    <button class="btn btn-ghost btn-sm" onclick="go('signin')">Try a different email</button>
-  </div>
-</div>`}
-
-function rWelcome(){
-  const g=HOUR<12?'morning':HOUR<17?'afternoon':'evening';
-  return`<div class="screen" style="display:flex">
-    <div class="screen-inner" style="justify-content:center;text-align:center">
-      <div class="logo" style="animation:fadeIn .8s both">Woblii</div>
-      <div class="display" style="margin-bottom:14px;animation:fadeIn .8s .14s both">Good ${g}.</div>
-      <p class="body-text" style="margin-bottom:44px;max-width:290px;margin-inline:auto;animation:fadeIn .8s .28s both">Before the day, let's find out where you actually are.</p>
-      <button class="btn btn-primary" onclick="startDay()" style="animation:fadeIn .8s .42s both">Begin →</button>
-      <br><br>
-      <button class="btn btn-ghost btn-sm" onclick="go('night')" style="opacity:.4;animation:fadeIn .8s .56s both">🌙 Night mode</button>
-      ${evidenceItems.length?`<br><br><button class="btn btn-ghost btn-sm" onclick="go('evidence')" style="animation:fadeIn .8s .68s both">Evidence Wall ✦</button>`:''}
-    </div>
-  </div>`
-}
-
-function rReturn(){
-  const comp=STATES.find(s=>s.id==(todayData?.state||'steady'))?.companion||'colin';
-  const mini=compMini(comp,MSG[comp]?.return||'Good to have you back.');
-  return`<div class="screen" style="display:flex">
-    <div class="screen-inner" style="justify-content:center;text-align:center">
-      <div class="logo" style="margin-bottom:36px">Woblii</div>
-      <div class="ret-quote">You're back.<br><strong>Nothing is held against you.</strong><br>The only thing that matters<br>is that you're here now.</div>
-      <div style="max-width:380px;margin:0 auto 16px;text-align:left">${mini}</div>
-      <div class="divider"></div>
-      <p class="body-text" style="margin-bottom:18px">What's one small true thing you could do in the next ten minutes?</p>
-      <input type="text" class="text-input" id="ri" placeholder="Make a drink. Message someone. Step outside." maxlength="120">
-      <div class="gap-lg"></div>
-      <button class="btn btn-primary btn-full" onclick="completeReturn()">I'm ready to begin →</button>
-    </div>
-  </div>`
-}
-
-function rStateCheck(){
-  const btns=STATES.map(s=>`<div class="state-btn ${tmp.state===s.id?'selected':''}" onclick="selState('${s.id}')"><span class="emoji">${s.emoji}</span><span class="slabel">${s.label}</span></div>`).join('');
-  const sel=STATES.find(s=>s.id===tmp.state);
-  const mini=sel?.companion&&MSG[sel.companion]?.stateCheck?.[tmp.state]?compMini(sel.companion,MSG[sel.companion].stateCheck[tmp.state]):'';
-  return`<div class="screen" style="display:flex">
-    <div class="screen-inner">
-      <div class="logo">Woblii</div>
-      <div class="pdots"><div class="pdot act"></div><div class="pdot"></div><div class="pdot"></div></div>
-      <div class="heading" style="margin-bottom:8px">Who are you <em>today?</em></div>
-      <p class="body-text" style="margin-bottom:22px">Not who you should be. Who you actually are right now.</p>
-      <div class="state-grid">${btns}</div>
-      ${sel?`<div class="card-sm" style="border-color:var(--accent-dim);margin-bottom:10px"><p class="body-text" style="font-size:.83rem">${sel.desc}</p><p class="body-text" style="font-size:.8rem;margin-top:5px"><span style="color:var(--accent)">Energy jar today:</span> ${sel.jar} drops.${sel.containment?' <span style="color:var(--voltage)"> Containment mode on.</span>':''}</p></div>${mini}`:'<div style="height:70px"></div>'}
-      <div class="spacer"></div>
-      <button class="btn btn-primary btn-full" onclick="goBody()" ${!tmp.state?'disabled style="opacity:.4"':''}>Continue →</button>
-    </div>
-  </div>`
-}
-
-function rBodyCheck(){
-  const O=(f,cs)=>cs.map(c=>`<div class="bopt ${tmp.body[f]===c.v?'on':''}" onclick="selBody('${f}','${c.v}')">${c.l}</div>`).join('');
-  const rows=[
-    {f:'sleep',q:'How did you sleep?',cs:[{v:'poor',l:'Poor'},{v:'ok',l:'OK'},{v:'good',l:'Well'}]},
-    {f:'eaten',q:'Have you eaten?',cs:[{v:'no',l:'Not yet'},{v:'bit',l:'A bit'},{v:'yes',l:'Yes'}]},
-    {f:'moved',q:'Have you moved?',cs:[{v:'no',l:'Not yet'},{v:'bit',l:'A little'},{v:'yes',l:'Yes'}]},
-    {f:'meds', q:'Did your medication go to plan yesterday?',cs:[{v:'yes',l:'Yes'},{v:'partly',l:'Partly'},{v:'no',l:'No'}]},
-    {f:'pain', q:'Any pain or discomfort?',cs:[{v:'yes',l:'Yes'},{v:'bit',l:'A little'},{v:'no',l:'None'}]}
-  ];
-  const done=rows.every(r=>tmp.body[r.f]);
-  const note=bodyNote();
-  return`<div class="screen" style="display:flex">
-    <div class="screen-inner">
-      <div class="logo">Woblii</div>
-      <div class="pdots"><div class="pdot dn"></div><div class="pdot act"></div><div class="pdot"></div></div>
-      <div class="heading" style="margin-bottom:8px">How's your <em>body?</em></div>
-      <p class="body-text" style="margin-bottom:22px">Your brain runs on your body. This shapes what we ask today.</p>
-      <div class="card">${rows.map(r=>`<div class="body-row"><span class="q">${r.q}</span><div class="bopts">${O(r.f,r.cs)}</div></div>`).join('')}</div>
-      ${done&&note?`<div class="card-sm" style="border-color:var(--teal-dim)"><p class="body-text" style="font-size:.8rem;color:var(--teal)">${note}</p></div>`:''}
-      <div class="spacer"></div>
-      <div style="display:flex;gap:9px;margin-top:18px">
-        <button class="btn btn-ghost" onclick="go('state-check')">← Back</button>
-        <button class="btn btn-primary" style="flex:1" onclick="go('regulation')" ${!done?'disabled style="opacity:.4;flex:1"':''}>Continue →</button>
-      </div>
-    </div>
-  </div>`
-}
-
-function bodyNote(){
-  const b=tmp.body;
-  if(b.sleep==='poor'&&b.eaten==='no')return"Low sleep and no food. Your jar is half empty before you start. Be very gentle.";
-  if(b.sleep==='poor')return"Poor sleep means executive function is already stretched. Start smaller than you think.";
-  if(b.eaten==='no')return"Your brain needs fuel. Eat something. Even small. Before anything else.";
-  if(b.meds==='no')return"Missed medication shifts the whole picture. We adjust the jar and go easier today.";
-  if(b.meds==='partly')return"Partial dose yesterday. Worth factoring that into what you take on today.";
-  if(b.pain==='yes')return"Pain takes real energy. Factor that into what you take on today.";
-  if(b.sleep==='good'&&b.eaten==='yes'&&b.moved==='yes'&&b.meds==='yes')return"Your body is well supported today. You have more capacity than usual.";
-  return"Good to know where you are. Let's build a day that works with this, not against it.";
-}
-
-function rRegulation(){
-  const g=GROUNDING[Math.floor(Math.random()*GROUNDING.length)];
-  const isLow=['flat','fragile'].includes(tmp.state);
-  return`<div class="reg-screen" style="display:flex">
-    <div style="max-width:420px;width:100%;margin:0 auto;text-align:center">
-      <div class="logo" style="margin-bottom:20px">Woblii</div>
-      <div class="pdots" style="justify-content:center"><div class="pdot dn"></div><div class="pdot dn"></div><div class="pdot act"></div></div>
-      <div class="heading" style="margin-bottom:6px">Before we begin</div>
-      <p class="body-text" style="font-size:.87rem">Planning works better when the nervous system is ready.</p>
-      <div class="breathe-circle">breathe</div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;text-align:left;margin:0 0 26px">
-        <p class="label" style="margin-bottom:9px">${g.title}</p>
-        <p class="body-text" style="font-size:.87rem">${g.body}</p>
-      </div>
-      <button class="btn btn-primary btn-full" onclick="goDay()" style="max-width:360px">${isLow?"I'm ready. Open the day.":"I've done this. Let's go."}</button>
-      <br><br>
-      <button class="btn btn-ghost btn-sm" onclick="goDay()" style="opacity:.4">Skip this</button>
-    </div>
-  </div>`
-}
-
-function rDay(){
-  const t=todayData;
-  const st=STATES.find(s=>s.id===t.state)||STATES[2];
-
-  // Jar size: adjust for meds and glucose
-  let jarSize=st.jar;
-  if(t.body?.meds==='no')jarSize=Math.max(jarSize-3,3);
-  if(t.body?.meds==='partly')jarSize=Math.max(jarSize-1,3);
-  const gi=glucoseInsight(glucoseData);
-  if(gi)jarSize=Math.max(jarSize+gi.jarAdjust,3);
-
-  const used=t.tasks.filter(k=>!k.done).reduce((s,k)=>s+(SIZES.find(z=>z.id===k.size)?.drops||2),0);
-  const over=used>jarSize;
-  const drops=Array.from({length:jarSize},(_,i)=>`<div class="drop ${i<used?(over?'over':'used'):''}"></div>`).join('');
-  const showV=['energised','lit-up'].includes(t.state);
-  const comp=st.companion;
-
-  // Companion opening: check if meds missed or glucose issue
-  let compMsg=getMsgPool(comp,t.state);
-  if(t.body?.meds==='no'&&MSG[comp]?.medMissed)compMsg=[MSG[comp].medMissed];
-  else if(gi?.level==='low'&&MSG[comp]?.glucoseLow)compMsg=[MSG[comp].glucoseLow];
-  else if(gi?.level==='high'&&MSG[comp]?.glucoseHigh)compMsg=[MSG[comp].glucoseHigh];
-
-  const card=comp?compCard(comp,compMsg):'';
-
-  // Glucose banner
-  let glucoseBanner='';
-  if(gi){
-    glucoseBanner=`<div class="glucose-banner ${gi.level}">
-      <div class="glucose-value">${glucoseData.valueMmol}</div>
-      <div>${gi.msg}</div>
-    </div>`;
-  }
-
-  const vHTML=t.voltageBox.map(v=>{
-    const h=Math.floor((Date.now()-v.timestamp)/3600000);
-    const d=Math.floor(h/24);
-    const age=d>=2?`${d}d`:h>0?`${h}h`:'just now';
-    return`<div class="vitem"><span class="vage">${age}</span><span class="vtxt">${v.text}</span>${h>=48?'<span style="font-size:.68rem;color:var(--success);flex-shrink:0">✓ 48hr</span>':''}</div>`;
-  }).join('')||`<p class="muted" style="font-size:.8rem;font-style:italic;padding:7px 0">Nothing here yet. High energy ideas rest here for 48 hours before becoming commitments.</p>`;
-
-  return`<div class="screen" style="display:flex">
-    <div class="top-nav">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="sbadge-state">${st.emoji} ${st.label}</div>
-        <div class="sync-indicator"><div class="sync-dot ${syncing?'syncing':''}"></div>${syncing?'saving':'saved'}</div>
-      </div>
-      <div class="nav-acts">
-        <button class="btn-icon" onclick="openMidday()" title="Mid-day check-in">☀</button>
-        <button class="btn-icon" onclick="go('evidence')" title="Evidence Wall">✦</button>
-        <button class="btn-icon" onclick="go('settings')" title="Settings">⚙</button>
-        <button class="btn-icon" onclick="go('night')" title="Night mode">🌙</button>
-      </div>
-    </div>
-    <div class="scroll-area"><div class="screen-inner">
-
-      ${t.state==='lit-up'?`<div class="cban">⚡ Containment mode on. Nothing new becomes a commitment until it has rested 48 hours in the Voltage Box.</div>`:''}
-      ${glucoseBanner}
-      ${(t.body?.sleep==='poor'||t.body?.eaten==='no'||t.body?.meds==='no')?`<div class="card-sm" style="border-color:var(--teal-dim);margin-bottom:14px"><p class="body-text" style="font-size:.78rem">${t.body.sleep==='poor'?'⚠ Low sleep. ':''}${t.body.eaten==='no'?'⚠ Not eaten yet. ':''}${t.body.meds==='no'?'⚠ Medication missed yesterday.':''}</p></div>`:''}
-
-      ${card}
-
-      <div class="sec-label">The one real thing</div>
-      <div class="ort-card ${t.ortDone?'done':''}">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:11px">
-          <p class="body-text" style="font-size:.76rem">If everything else falls away, this counts as a full day.</p>
-          ${t.ortDone?`<span style="color:var(--success);font-size:.83rem;flex-shrink:0">✓ Done</span>`:`<button class="btn btn-sm btn-teal" onclick="toggleORT()" style="flex-shrink:0">Done ✓</button>`}
-        </div>
-        <input type="text" class="ort-input" id="ort-input" placeholder="What is the one thing that matters today?" value="${t.oneRealThing||''}" onchange="saveORT(this.value)" maxlength="100" ${t.ortDone?'readonly':''}>
-      </div>
-
-      <div class="sec-label">Energy jar <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.7rem;color:var(--text-muted)">${jarSize!==st.jar?`adjusted to ${jarSize} drops today`:''}</span></div>
-      <div class="card" style="margin-bottom:18px">
-        <div class="jar-header">
-          <span class="body-text" style="font-size:.8rem;${over?'color:var(--danger)':''}">${used} of ${jarSize} drops used${over?' — over capacity':''}</span>
-          <span class="muted" style="font-size:.73rem">${t.tasks.filter(k=>k.done).length} complete</span>
-        </div>
-        <div class="jar-drops">${drops}</div>
-      </div>
-
-      <div class="sec-label">Tasks</div>
-      ${t.tasks.length===0?`<div class="card-sm" style="text-align:center;border-style:dashed;opacity:.55;margin-bottom:11px"><p class="body-text" style="font-size:.83rem;font-style:italic">Add your first task. Size it honestly.</p></div>`:''}
-      ${t.tasks.slice(0,2).map(k=>taskHTML(k)).join('')}
-      ${t.tasks.length>0?`<div class="enough-line"><div class="el"></div><div class="etxt">enough</div><div class="er"></div></div>`:''}
-      ${t.tasks.slice(2).map(k=>taskHTML(k)).join('')}
-
-      <div class="add-form" id="add-form">
-        <p class="label" style="margin-bottom:12px">What is the very first physical action?</p>
-        <input type="text" class="ati" id="ti" placeholder="The action, not the project..." maxlength="100">
-        <p class="label" style="margin-bottom:7px">Energy cost</p>
-        <div class="size-sel">${SIZES.map(s=>`<div class="sopt ${tmp.size===s.id?'on':''}" onclick="selSize('${s.id}')">${s.label} <span style="opacity:.45">(${s.desc})</span></div>`).join('')}</div>
-        <p class="label" style="margin-bottom:5px">When you come back, start here: <span style="opacity:.45;text-transform:none;font-size:.68rem;letter-spacing:0">(optional)</span></p>
-        <input type="text" class="bci" id="bci" placeholder="The exact first thing to do when you return to this...">
-        <div style="display:flex;gap:7px">
-          <button class="btn btn-primary btn-sm" onclick="addTask()">Add task</button>
-          <button class="btn btn-ghost btn-sm" onclick="toggleForm()">Cancel</button>
-        </div>
-      </div>
-      <button class="btn btn-ghost" onclick="toggleForm()" id="add-btn" style="width:100%;margin-bottom:18px">+ Add task</button>
-
-      ${showV?`<div class="sec-label" style="color:var(--voltage)">Voltage box</div>
-      <div class="vbox">
-        <div class="vrule">Everything here rests for 48 hours before it becomes a commitment. Your energy is real. This protects it from doing damage.</div>
-        ${vHTML}
-        <div style="display:flex;gap:7px;margin-top:11px">
-          <input type="text" class="ati" id="vi" placeholder="An idea, plan, or impulse..." style="flex:1;margin-bottom:0" maxlength="120">
-          <button class="btn btn-voltage btn-sm" onclick="addVoltage()" style="flex-shrink:0">Hold it</button>
-        </div>
-      </div>`:''}
-
-      <div style="text-align:center;padding:24px 0 8px;border-top:1px solid var(--border);margin-top:20px">
-        <p class="muted" style="font-size:.7rem;margin-bottom:8px">${currentUser?.email||''}</p>
-        <button class="btn btn-danger btn-sm" onclick="signOut()">Sign out</button>
-      </div>
-
-    </div></div>
-    <div class="bot-acts">
-      <button class="btn btn-ghost" onclick="go('evidence')" style="flex:1">Evidence Wall</button>
-      <button class="btn btn-teal" onclick="go('close-day')" style="flex:1">Close day →</button>
-    </div>
-  </div>`
-}
-
-function taskHTML(tk){
-  const sz=SIZES.find(s=>s.id===tk.size)||SIZES[1];
-  return`<div class="task-item ${tk.done?'done':''}" id="ti-${tk.id}">
-    <div class="tchk" onclick="toggleTask('${tk.id}')" id="tc-${tk.id}">${tk.done?'✓':''}</div>
-    <div class="tcontent">
-      <div class="ttext">${tk.text}</div>
-      <div class="tmeta"><span class="sbadge ${tk.size}">${sz.label}</span></div>
-      ${tk.bc?`<div class="tbc" style="margin-top:5px"><span>↩</span><span>${tk.bc}</span></div>`:''}
-    </div>
-    <button class="tdel" onclick="delTask('${tk.id}')" title="Remove">×</button>
-  </div>`
-}
-
-function rSettings(){
-  const email=userPrefs?.libre_email||'';
-  const region=userPrefs?.libre_region||'EU';
-  return`<div class="screen" style="display:flex"><div class="screen-inner">
-    <div style="display:flex;align-items:center;gap:11px;margin-bottom:28px">
-      <button class="btn-icon" onclick="back()">←</button>
-      <div><div class="heading">Settings</div><p class="muted" style="font-size:.76rem">Your Woblii preferences</p></div>
-    </div>
-
-    <div class="sec-label">Libre glucose sensor</div>
-    <div class="card" style="margin-bottom:20px">
-      <p class="body-text" style="font-size:.84rem;margin-bottom:14px">Connect your LibreLinkUp account so Woblii can read glucose data and adjust your energy jar automatically.</p>
-      <p class="label" style="margin-bottom:5px">LibreLinkUp email</p>
-      <input type="email" class="text-input" id="libre-email" placeholder="email@example.com" value="${email}" style="margin-bottom:10px">
-      <p class="label" style="margin-bottom:5px">LibreLinkUp password</p>
-      <input type="password" class="text-input pass-input" id="libre-pass" placeholder="••••••••" style="margin-bottom:10px">
-      <p class="label" style="margin-bottom:5px">Region</p>
-      <div style="display:flex;gap:8px;margin-bottom:16px">
-        ${['EU','US','AE','AP','AU','CA','DE','FR','JP','US'].filter((v,i,a)=>a.indexOf(v)===i).map(r=>`<div class="bopt ${region===r?'on':''}" onclick="selectRegion('${r}')" style="cursor:pointer">${r}</div>`).join('')}
-      </div>
-      <button class="btn btn-primary" onclick="saveLibreSettings()">Save Libre settings</button>
-      ${email?`<br><br><button class="btn btn-ghost btn-sm" onclick="testLibre()">Test connection</button>`:''}
-    </div>
-
-    <div class="sec-label">Account</div>
-    <div class="card">
-      <p class="muted" style="font-size:.8rem;margin-bottom:12px">${currentUser?.email||''}</p>
-      <button class="btn btn-danger btn-sm" onclick="signOut()">Sign out</button>
-    </div>
-  </div></div>`
-}
-
-function selectRegion(r){
-  userPrefs={...userPrefs,libre_region:r};
-  document.querySelectorAll('#app .bopt').forEach(b=>b.classList.toggle('on',b.getAttribute('onclick')?.includes(`'${r}'`)));
-}
-async function saveLibreSettings(){
-  const email=document.getElementById('libre-email')?.value?.trim();
-  const pass=document.getElementById('libre-pass')?.value?.trim();
-  if(!email||!pass){toast('Please enter both email and password');return}
-  userPrefs={...userPrefs,libre_email:email,libre_password:pass};
-  await dbSavePrefs(userPrefs);
-  toast('Libre settings saved. We\'ll fetch readings on your next day start.');
-}
-async function testLibre(){
-  toast('Testing connection...',4000);
-  const g=await fetchGlucose();
-  if(g){toast(`Connected! Current reading: ${g.valueMmol} mmol/L`)}
-  else{toast('Could not connect. Check your email and password.',3500)}
-}
-
-function rEvidence(){
-  const items=evidenceItems.length
-    ?evidenceItems.map(e=>`<div class="ev-item"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:7px"><span>${e.text}</span><button onclick="deleteEvidence('${e.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.88rem;flex-shrink:0;padding:0 0 0 7px">×</button></div>${e.entry_date?`<div class="muted" style="font-size:.68rem;margin-top:3px">${e.entry_date}</div>`:''}</div>`).join('')
-    :`<div class="card-sm" style="text-align:center;border-style:dashed;opacity:.55"><p class="body-text" style="font-size:.83rem;font-style:italic">Capture proof of who you are. Not tasks. Qualities. Moments. Evidence.</p></div>`;
-  return`<div class="screen" style="display:flex"><div class="screen-inner">
-    <div style="display:flex;align-items:center;gap:11px;margin-bottom:28px">
-      <button class="btn-icon" onclick="back()">←</button>
-      <div><div class="heading">Evidence <em>Wall</em></div><p class="muted" style="font-size:.76rem">Proof of your capability. For hard days.</p></div>
-    </div>
-    <div>${items}</div>
-    <div class="card" style="margin-top:14px">
-      <p class="label" style="margin-bottom:7px">Add new evidence</p>
-      <p class="body-text" style="font-size:.78rem;margin-bottom:11px">What happened that shows who you actually are?</p>
-      <input type="text" class="ati" id="ei" placeholder="Describe the moment or quality..." maxlength="200">
-      <button class="btn btn-primary" onclick="addEvidence()" style="margin-top:3px">Add to wall</button>
-    </div>
-  </div></div>`
-}
-
-function rCloseDay(){
-  const done=todayData.tasks.filter(t=>t.done).length,tot=todayData.tasks.length;
-  const comp=STATES.find(s=>s.id===todayData.state)?.companion;
-  const farewell=comp&&todayData.ortDone?compMini(comp,rnd(MSG[comp].ortDone)):'';
-  return`<div class="screen" style="display:flex"><div class="screen-inner">
-    <div style="display:flex;align-items:center;gap:11px;margin-bottom:28px">
-      <button class="btn-icon" onclick="go('day')">←</button>
-      <div class="heading">Close the <em>day</em></div>
-    </div>
-    ${todayData.ortDone?`<div class="card-sm" style="border-color:var(--success);margin-bottom:16px;text-align:center"><p style="color:var(--success);font-size:.88rem">✓ Your one real thing is done. Today counts.</p></div>`:
-    `<div class="card-sm" style="margin-bottom:16px;text-align:center;opacity:.65"><p class="body-text" style="font-size:.83rem">${done} of ${tot} tasks done.${tot===0?' You showed up. That is something.':''}</p></div>`}
-    ${farewell}
-    <div class="star-sep">✦ ✦ ✦</div>
-    <div class="card" style="margin-bottom:14px">
-      <p class="label" style="margin-bottom:5px">One thing that happened today</p>
-      <textarea class="close-ta" id="cl-h" placeholder="Something happened today, however small...">${todayData.close?.happening||''}</textarea>
-    </div>
-    <div class="card" style="margin-bottom:22px">
-      <p class="label" style="margin-bottom:5px">What does tomorrow's version of you need to know?</p>
-      <textarea class="close-ta" id="cl-t" placeholder="Tomorrow you should know...">${todayData.close?.tomorrow||''}</textarea>
-    </div>
-    <button class="btn btn-primary btn-full" onclick="saveClose()">Save and rest →</button>
-    <div class="gap-sm"></div>
-    <button class="btn btn-ghost btn-full" onclick="go('day')">Back to today</button>
-  </div></div>`
-}
-
-function rNight(){
-  const ev=evidenceItems.length?evidenceItems[Math.floor(Math.random()*evidenceItems.length)].text:null;
-  const isLow=['flat','fragile'].includes(todayData?.state);
-  const comp=isLow?(todayData?.state==='fragile'?'pebble':'grumble'):null;
-  const nightComp=comp?compMini(comp,comp==='pebble'?"Still and quiet. <strong>The night will pass.</strong>":"Still here. <strong>That's something.</strong> The night will pass."):'';
-  return`<div class="night-screen"><div class="night-inner">
-    <div style="font-size:1.1rem;opacity:.28;letter-spacing:14px;margin-bottom:44px">· · ·</div>
-    <div class="display" style="font-size:1.7rem;margin-bottom:14px;font-style:italic;color:var(--text-soft)">The night doesn't need solving.</div>
-    <p class="body-text" style="margin-bottom:32px;font-size:.87rem">A place to put the thoughts down so they stop circling. Nothing here is a plan.</p>
-    <div class="card" style="text-align:left;margin-bottom:14px;background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.065)">
-      <p class="label" style="margin-bottom:7px">Ground yourself first</p>
-      <p class="body-text" style="font-size:.84rem">Name five things you can physically feel right now. The weight of the chair. The temperature of your hands. Your feet on the floor. Take thirty seconds.</p>
-    </div>
-    <div class="card" style="text-align:left;margin-bottom:14px;background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.065)">
-      <p class="label" style="margin-bottom:4px">Put the thoughts down</p>
-      <textarea class="dump-ta" placeholder="Whatever is circling..."></textarea>
-    </div>
-    ${ev?`<div style="padding:18px;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.1);border-radius:var(--radius);margin-bottom:24px;text-align:left"><p class="label" style="margin-bottom:7px;color:rgba(201,168,76,.45)">Something true about you</p><p style="font-family:var(--font-d);font-style:italic;font-size:.98rem;color:rgba(240,235,224,.7);line-height:1.5">${ev}</p></div>`:''}
-    ${nightComp?`<div style="max-width:380px;margin:0 auto 20px">${nightComp}</div>`:''}
-    <p class="body-text" style="font-size:.8rem;opacity:.35;margin-bottom:28px">This is not the whole story.</p>
-    <button class="btn btn-ghost btn-full" onclick="back()" style="opacity:.38;border-color:rgba(255,255,255,.07);color:rgba(255,255,255,.3)">Return to day</button>
-  </div></div>`
-}
-
-function rDone(){
-  const msg=todayData.close?.tomorrow||'';
-  return`<div class="screen" style="display:flex"><div class="screen-inner" style="justify-content:center;text-align:center">
-    <div class="logo" style="margin-bottom:55px">Woblii</div>
-    <div class="display" style="margin-bottom:14px">Day closed.</div>
-    ${msg?`<div class="card" style="text-align:left;margin:22px 0"><p class="label" style="margin-bottom:7px">From you, to tomorrow</p><p style="font-family:var(--font-d);font-style:italic;font-size:1rem;line-height:1.5;color:var(--text-soft)">${msg}</p></div>`:''}
-    <p class="body-text" style="margin:22px 0">Coming back is the whole skill.<br>You have already done it.</p>
-    <button class="btn btn-primary" onclick="go('welcome')">Start fresh tomorrow</button>
-  </div></div>`
-}
-
-// ================================================================
-// MIDDAY
-// ================================================================
-function openMidday(){
-  const cur=todayData?.state||'steady';middayNew=cur;
-  document.getElementById('midday-modal').innerHTML=`
-  <div class="midday-modal" onclick="if(event.target===this)closeMidday()">
-    <div class="midday-sheet">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div class="heading" style="font-size:1.2rem">Mid-day check in</div>
-        <button class="btn-icon" onclick="closeMidday()">×</button>
-      </div>
-      <p class="body-text" style="font-size:.84rem;margin-bottom:12px">How's the jar actually feeling now?</p>
-      <div style="display:flex;flex-wrap:wrap">
-        ${STATES.map(s=>`<div class="mds-btn ${s.id===cur?'on':''}" onclick="midSel('${s.id}')">${s.emoji} ${s.label}</div>`).join('')}
-      </div>
-      <p class="muted" style="font-size:.74rem;margin:12px 0 20px">If your state has shifted, your companion and energy jar will update.</p>
-      <button class="btn btn-primary btn-full" onclick="saveMidday()">Update and continue →</button>
-      <div class="gap-sm"></div>
-      <button class="btn btn-ghost btn-full" onclick="closeMidday()">Nothing has changed</button>
-    </div>
-  </div>`;
-}
-function midSel(id){middayNew=id;document.querySelectorAll('.mds-btn').forEach(b=>b.classList.toggle('on',b.getAttribute('onclick')?.includes(`'${id}'`)))}
-function saveMidday(){
-  if(middayNew&&middayNew!==todayData.state){todayData.state=middayNew;document.body.dataset.state=middayNew;scheduleSave();toast('Updated. Your day adapts with you.')}
-  closeMidday();go('day');
-}
-function closeMidday(){document.getElementById('midday-modal').innerHTML=''}
-
-// ================================================================
-// ACTIONS
-// ================================================================
-function startDay(){tmp={state:'',body:{},size:'small'};go('state-check')}
-function completeReturn(){go('state-check')}
-function selState(id){tmp.state=id;go('state-check')}
-function selBody(f,v){tmp.body[f]=v;go('body-check')}
-function goBody(){if(tmp.state)go('body-check')}
-function back(){todayData?.state?go('day'):go('welcome')}
-async function goDay(){todayData.state=tmp.state;todayData.body={...tmp.body};document.body.dataset.state=tmp.state;scheduleSave();go('day')}
-function saveORT(v){todayData.oneRealThing=v;scheduleSave()}
-function toggleORT(){
-  if(!todayData.oneRealThing?.trim()){toast('Add your one real thing first');return}
-  todayData.ortDone=!todayData.ortDone;scheduleSave();
-  if(todayData.ortDone){
-    const comp=STATES.find(s=>s.id===todayData.state)?.companion;
-    if(comp)updateBubble(rnd(MSG[comp].ortDone));
-    toast('✓ The one real thing. Done.');
-  }
-  setTimeout(()=>go('day'),320);
-}
-function selSize(id){tmp.size=id;document.querySelectorAll('.sopt').forEach(el=>el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${id}'`)))}
-function toggleForm(){
-  const f=document.getElementById('add-form'),b=document.getElementById('add-btn');
-  if(!f)return;const o=f.classList.toggle('open');b.style.display=o?'none':'';if(o)f.querySelector('input')?.focus();
-}
-function addTask(){
-  const text=document.getElementById('ti')?.value?.trim();
-  const bc=document.getElementById('bci')?.value?.trim();
-  if(!text){toast('What is the task?');return}
-  const st=STATES.find(s=>s.id===todayData.state)||STATES[2];
-  const used=todayData.tasks.filter(k=>!k.done).reduce((s,k)=>s+(SIZES.find(z=>z.id===k.size)?.drops||2),0);
-  const adding=SIZES.find(s=>s.id===tmp.size)?.drops||2;
-  if(used+adding>st.jar){const comp=STATES.find(s=>s.id===todayData.state)?.companion;if(comp)updateBubble(MSG[comp].overJar);toast('Jar is at capacity. Size down?',2800)}
-  todayData.tasks.push({id:Date.now().toString(),text,size:tmp.size,done:false,bc:bc||''});
-  scheduleSave();go('day');
-}
-function toggleTask(id){
-  const tk=todayData.tasks.find(t=>t.id===id);if(!tk)return;
-  tk.done=!tk.done;scheduleSave();
-  if(tk.done){
-    const comp=STATES.find(s=>s.id===todayData.state)?.companion;
-    if(comp){updateBubble(rnd(MSG[comp].taskDone));const ts={grumble:['Hmph. Done.','Right then.'],pebble:['That counts.','Good.'],colin:['Good.','Sorted.'],crunchy:['Crunch! ✓','Belter!'],pip:['YES!','BOOM!']};toast(rnd(ts[comp]||['Done.']))}
-    else toast('Done.')
-  }
-  setTimeout(()=>go('day'),340);
-}
-function delTask(id){todayData.tasks=todayData.tasks.filter(t=>t.id!==id);scheduleSave();go('day')}
-function addVoltage(){
-  const v=document.getElementById('vi')?.value?.trim();if(!v)return;
-  todayData.voltageBox.push({id:Date.now().toString(),text:v,timestamp:Date.now()});
-  scheduleSave();
-  const comp=STATES.find(s=>s.id===todayData.state)?.companion;
-  if(comp&&MSG[comp]?.voltage)updateBubble(MSG[comp].voltage);
-  toast('Held. 48 hours before it becomes a commitment.');go('day');
-}
-async function addEvidence(){
-  const text=document.getElementById('ei')?.value?.trim();if(!text)return;
-  const now=new Date();
-  const item=await dbAddEvidence(text,now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}));
-  if(item){evidenceItems.unshift(item);toast('Added to your wall.');go('evidence')}
-  else toast('Could not save. Please try again.');
-}
-async function deleteEvidence(id){await dbDeleteEvidence(id);evidenceItems=evidenceItems.filter(e=>e.id!==id);go('evidence')}
-function saveClose(){
-  todayData.close={happening:document.getElementById('cl-h')?.value?.trim(),tomorrow:document.getElementById('cl-t')?.value?.trim(),closedAt:Date.now()};
-  scheduleSave();go('done');
-}
-
-// ================================================================
-// INIT
-// ================================================================
-document.addEventListener('DOMContentLoaded',()=>{
-  go('loading');
-  sb.auth.onAuthStateChange(async(event,session)=>{
-    if(session?.user){
-      currentUser=session.user;
-      if(window.location.hash&&window.location.hash.includes('access_token')){
-        window.history.replaceState({},document.title,window.location.pathname+window.location.search);
-      }
-      await loadUserData();
-    } else {
-      currentUser=null;todayData=freshToday();evidenceItems=[];
-      go('signin');
-    }
-  });
-});
+// Scroll reveal
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 </script>
 </body>
 </html>
