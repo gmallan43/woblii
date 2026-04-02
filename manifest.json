@@ -1,0 +1,42 @@
+{
+  "name": "Woblii",
+  "short_name": "Woblii",
+  "description": "A daily companion for every kind of day. Built for ADHD and bipolar minds.",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#181512",
+  "theme_color": "#c9a84c",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%23181512'/%3E%3Ctext x='256' y='340' font-family='Georgia,serif' font-size='280' font-weight='300' fill='%23c9a84c' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%23181512'/%3E%3Ctext x='256' y='340' font-family='Georgia,serif' font-size='280' font-weight='300' fill='%23c9a84c' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Open today",
+      "short_name": "Today",
+      "description": "Open your day in Woblii",
+      "url": "/app.html",
+      "icons": []
+    },
+    {
+      "name": "Night mode",
+      "short_name": "Night",
+      "description": "Open night mode",
+      "url": "/app.html#night",
+      "icons": []
+    }
+  ]
+}
