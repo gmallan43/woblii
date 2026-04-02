@@ -292,6 +292,30 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .msg-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-soft);font-family:var(--font-b);font-size:.82rem;padding:8px 12px;outline:none;resize:none;line-height:1.5;min-height:60px;font-style:italic;transition:border-color .2s}
 .msg-input:focus{border-color:var(--accent-dim)}.msg-input::placeholder{color:var(--text-muted);opacity:.6}
 
+/* SCREENING */
+.screening-screen{min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+.screening-inner{max-width:480px;width:100%;margin:0 auto;padding:50px 24px 60px;flex:1;display:flex;flex-direction:column}
+.screening-q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:10px;transition:border .2s}
+.screening-q .qtext{font-size:.92rem;color:var(--text);line-height:1.55;margin-bottom:12px}
+.screening-opts{display:flex;gap:6px;flex-wrap:wrap}
+.screening-opt{padding:6px 12px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:.75rem;cursor:pointer;color:var(--text-soft);transition:all .2s;font-family:var(--font-b);-webkit-tap-highlight-color:transparent}
+.screening-opt.on{background:var(--teal-dim);border-color:var(--teal);color:var(--teal)}
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:14px}
+.result-score{font-family:var(--font-d);font-size:2.8rem;font-weight:300;color:var(--accent);line-height:1;margin-bottom:4px}
+.result-label{font-size:.7rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+.result-insight{font-size:.88rem;color:var(--text-soft);line-height:1.7;margin-bottom:12px}
+.result-woblii{background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px;font-size:.82rem;color:var(--teal);line-height:1.6;border-left:2px solid var(--teal)}
+.screening-hub-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .22s;-webkit-tap-highlight-color:transparent}
+.screening-hub-card:hover{border-color:var(--accent-dim)}
+.screening-hub-card.done{opacity:.6;border-style:dashed}
+.shub-icon{font-size:1.6rem;flex-shrink:0}
+.shub-info{flex:1}
+.shub-title{font-family:var(--font-d);font-size:1.1rem;color:var(--text);margin-bottom:2px}
+.shub-desc{font-size:.75rem;color:var(--text-muted)}
+.shub-badge{font-size:.65rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:20px;flex-shrink:0}
+.shub-badge.done{background:rgba(106,171,124,.14);color:var(--success)}
+.shub-badge.todo{background:var(--surface2);color:var(--text-muted)}
+
 @media(max-width:400px){.screen-inner{padding:26px 15px 50px}.top-nav{padding:15px 15px 0}.comp-intro-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
@@ -661,6 +685,7 @@ let tmp={state:'',body:{},size:'small'};
 let pendingEmail='',middayNew='',saveTimer=null,syncing=false;
 let onboardStep=0,selectedEmailTime='08:00',emailEnabled=true;
 let activeCompIntro='grumble';
+let screeningId='',screeningAnswers={},screeningResults={};
 
 function freshToday(){return{date:TODAY,state:'',body:{},oneRealThing:'',ortDone:false,tasks:[],voltageBox:[],close:null}}
 
@@ -873,6 +898,13 @@ async function loadUserData(){
 // ================================================================
 function go(s){
   const app=document.getElementById('app');
+  // Screening hub has dynamic fromOnboarding param — handle separately
+  if(s==='screening-hub'){
+    app.innerHTML=rScreeningHub(false);
+    document.body.dataset.state=todayData?.state||'steady';
+    requestAnimationFrame(()=>{const el=app.querySelector('.screening-screen');if(el){el.style.display='flex';el.classList.add('fade-in')}});
+    return;
+  }
   const map={
     loading:rLoading,signin:rSignin,'email-sent':rEmailSent,
     onboarding:rOnboarding,
@@ -966,12 +998,13 @@ function rEmailSent(){return`<div class="auth-screen" style="display:flex">
 // ONBOARDING
 // ================================================================
 function rOnboarding(){
-  const steps=['welcome','companions','name','notifications','ready'];
+  const steps=['welcome','companions','screening','name','notifications','ready'];
   const step=steps[onboardStep]||'welcome';
   const dots=steps.map((_,i)=>`<div class="onboard-dot ${i<onboardStep?'dn':i===onboardStep?'act':''}"></div>`).join('');
 
   if(step==='welcome')return rOnboardWelcome(dots);
   if(step==='companions')return rOnboardCompanions(dots);
+  if(step==='screening')return rOnboardScreeningIntro(dots);
   if(step==='name')return rOnboardName(dots);
   if(step==='notifications')return rOnboardNotifications(dots);
   if(step==='ready')return rOnboardReady(dots);
@@ -1017,7 +1050,41 @@ function rOnboardCompanions(dots){
   </div>
 </div>`}
 
-function rOnboardName(dots){return`<div class="onboard-screen" style="display:flex">
+function rOnboardScreeningIntro(dots){
+  return`<div class="onboard-screen" style="display:flex">
+  <div class="onboard-inner">
+    <div class="onboard-progress">${dots}</div>
+    <div class="heading" style="margin-bottom:8px">Understand your <em>brain.</em></div>
+    <p class="body-text" style="margin-bottom:16px">Woblii includes four short validated screenings — for ADHD, autism, bipolar, and dyslexia. They cannot diagnose anything. But they can reflect your experience back to you in a way that is sometimes useful.</p>
+    <div class="card-sm" style="margin-bottom:20px;border-color:var(--teal-dim)">
+      <p class="body-text" style="font-size:.82rem;color:var(--teal)">Results are saved privately to your account. Only you can see them.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
+      ${SCREENING_ORDER.map(id=>{
+        const s=SCREENINGS[id];
+        return`<div style="display:flex;align-items:center;gap:11px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius-sm)">
+          <span style="font-size:1.2rem">${s.icon}</span>
+          <div><p style="font-size:.88rem;color:var(--text)">${s.title}</p><p style="font-size:.72rem;color:var(--text-muted)">${s.questions.length} questions</p></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary btn-full" onclick="startOnboardScreening()">Start the screenings →</button>
+    <div class="gap-sm"></div>
+    <button class="btn btn-ghost btn-sm btn-full" onclick="nextOnboard()" style="opacity:.6">Skip for now — I can do this later</button>
+    <div class="gap-sm"></div>
+    <button class="btn btn-ghost btn-sm btn-full" onclick="prevOnboard()">← Back</button>
+  </div>
+</div>`}
+
+function startOnboardScreening(){
+  // Show the screening hub with fromOnboarding=true
+  const app=document.getElementById('app');
+  app.innerHTML=rScreeningHub(true);
+  requestAnimationFrame(()=>{const el=app.querySelector('.screening-screen');if(el){el.style.display='flex';el.classList.add('fade-in')}});
+  // Override startScreening to pass fromOnboarding=true
+  window._fromOnboarding=true;
+}
   <div class="onboard-inner">
     <div class="onboard-progress">${dots}</div>
     <div class="heading" style="margin-bottom:8px">One last thing<em>.</em></div>
@@ -1115,6 +1182,7 @@ async function completeOnboarding(){
 function rWelcome(){
   const n=userName();
   const g=HOUR<12?'morning':HOUR<17?'afternoon':'evening';
+  const hasAnyScreening=SCREENING_ORDER.some(id=>userPrefs?.brain_profile?.[id]!==undefined);
   return`<div class="screen" style="display:flex">
     <div class="screen-inner" style="justify-content:center;text-align:center">
       <div class="logo" style="animation:fadeIn .8s both">Woblii</div>
@@ -1125,11 +1193,10 @@ function rWelcome(){
       <button class="btn btn-ghost btn-sm" onclick="go('night')" style="opacity:.4;animation:fadeIn .8s .56s both">🌙 Night mode</button>
       ${evidenceItems.length?`<br><br><button class="btn btn-ghost btn-sm" onclick="go('evidence')" style="animation:fadeIn .8s .68s both">Evidence Wall ✦</button>`:''}
       ${allDays.length>=7?`<br><br><button class="btn btn-ghost btn-sm" onclick="go('patterns')" style="animation:fadeIn .8s .78s both">Patterns ∿</button>`:''}
+      <br><br><button class="btn btn-ghost btn-sm" onclick="go('screening-hub')" style="animation:fadeIn .8s .88s both;opacity:${hasAnyScreening?'1':'.55'}">Your brain 🧠${hasAnyScreening?'':' — optional'}</button>
     </div>
   </div>`
 }
-
-function rReturn(){
   const comp=STATES.find(s=>s.id==(todayData?.state||'steady'))?.companion||'colin';
   const mini=compMini(comp,MSG[comp]?.return||'Good to have you back.');
   const n=userName();
@@ -1739,6 +1806,332 @@ function saveClose(){
   scheduleSave();go('done');
 }
 
+// ================================================================
+// SCREENINGS DATA
+// ================================================================
+const SCREENINGS={
+  adhd:{
+    id:'adhd',
+    title:'ADHD Screening',
+    subtitle:'Adult ADHD Self-Report Scale (ASRS-v1.1)',
+    intro:'Six questions about how you have felt and conducted yourself over the past six months. There are no right or wrong answers.',
+    companion:'crunchy',
+    compMsg:'Right, these questions are very familiar to me. Just answer honestly — whatever feels most true.',
+    icon:'⚡',
+    questions:[
+      {id:'a1',text:'How often do you have trouble wrapping up the final details of a project, once the challenging parts have been done?',opts:['Never','Rarely','Sometimes','Often','Very often']},
+      {id:'a2',text:'How often do you have difficulty getting things in order when you have to do a task that requires organisation?',opts:['Never','Rarely','Sometimes','Often','Very often']},
+      {id:'a3',text:'How often do you have problems remembering appointments or obligations?',opts:['Never','Rarely','Sometimes','Often','Very often']},
+      {id:'a4',text:'When you have a task that requires a lot of thought, how often do you avoid or delay getting started?',opts:['Never','Rarely','Sometimes','Often','Very often']},
+      {id:'a5',text:'How often do you fidget or squirm with your hands or feet when you have to sit down for a long time?',opts:['Never','Rarely','Sometimes','Often','Very often']},
+      {id:'a6',text:'How often do you feel overly active and compelled to do things, like you were driven by a motor?',opts:['Never','Rarely','Sometimes','Often','Very often']}
+    ],
+    score(answers){
+      // ASRS scoring: Sometimes/Often/Very Often on q1-3 = 1 point; Often/Very Often on q4-6 = 1 point
+      let s=0;
+      ['a1','a2','a3'].forEach(id=>{const v=answers[id];if(v==='Sometimes'||v==='Often'||v==='Very often')s++});
+      ['a4','a5','a6'].forEach(id=>{const v=answers[id];if(v==='Often'||v==='Very often')s++});
+      return s;
+    },
+    result(score){
+      const threshold=score>=4;
+      return{
+        score,
+        max:6,
+        threshold,
+        headline:threshold?'Your responses are consistent with ADHD symptoms':'Your responses are below the clinical threshold for ADHD',
+        detail:threshold
+          ?'Four or more points on this screening is associated with ADHD in adults. This is not a diagnosis — but it is the kind of result that GPs use as a starting point for referral. Many people find it validating to see their experience reflected back this clearly.'
+          :'Your responses do not suggest a strong ADHD profile based on this screening. That does not mean attention and focus are never a challenge — it just means the pattern here does not meet the clinical threshold.',
+        woblii:threshold
+          ?'Woblii is built for exactly this. The energy jar, the enough line, the breadcrumb system — all of these are here because ADHD makes sustained attention and task switching genuinely hard. You are in the right place.'
+          :'Even without an ADHD profile, Woblii\'s capacity-based approach works for anyone whose energy and attention are variable.'
+      }
+    }
+  },
+  autism:{
+    id:'autism',
+    title:'Autism Screening',
+    subtitle:'Autism Spectrum Quotient — AQ-10',
+    intro:'Ten statements about how things generally are for you. Answer based on how you usually are, not how you think you should be.',
+    companion:'pebble',
+    compMsg:'No rush with these. Just what feels true for you. There is no wrong answer here.',
+    icon:'🌿',
+    questions:[
+      {id:'b1',text:'I often notice small sounds when others do not.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b2',text:'I usually concentrate more on the whole picture, rather than the small details.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b3',text:'I find it easy to do more than one thing at once.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b4',text:'If there is an interruption, I can switch back to what I was doing very quickly.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b5',text:'I find it easy to read between the lines when someone is talking to me.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b6',text:'I know how to tell if someone listening to me is getting bored.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b7',text:'When I\'m reading a story I find it difficult to work out the characters\' intentions.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b8',text:'I like to collect information about categories of things (e.g. types of cars, birds, trains, plants).',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b9',text:'I find it easy to work out what someone is thinking or feeling just by looking at their face.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']},
+      {id:'b10',text:'I find it difficult to work out people\'s intentions.',opts:['Definitely agree','Slightly agree','Slightly disagree','Definitely disagree']}
+    ],
+    score(answers){
+      // AQ-10: score 1 point for autistic-direction response
+      // Q1,7,8,10: Definitely/Slightly agree = 1 point
+      // Q2,3,4,5,6,9: Definitely/Slightly disagree = 1 point
+      let s=0;
+      ['b1','b7','b8','b10'].forEach(id=>{const v=answers[id];if(v==='Definitely agree'||v==='Slightly agree')s++});
+      ['b2','b3','b4','b5','b6','b9'].forEach(id=>{const v=answers[id];if(v==='Definitely disagree'||v==='Slightly disagree')s++});
+      return s;
+    },
+    result(score){
+      const threshold=score>=6;
+      return{
+        score,
+        max:10,
+        threshold,
+        headline:threshold?'Your responses suggest you may be autistic':'Your responses are below the clinical threshold for autism',
+        detail:threshold
+          ?'A score of six or above on the AQ-10 is the threshold used in UK primary care to indicate a possible autism spectrum condition. This is not a diagnosis. But it is a meaningful result that is worth taking to a GP if you have not already explored this.'
+          :'Your responses do not suggest a strong autistic profile on this screening. Autism presents very differently in different people, and screenings have limitations — particularly for women and people who have learned to mask.',
+        woblii:threshold
+          ?'The regulation gateway before your day begins, the predictable structure of the check-in, and the breadcrumb system for tasks all exist because routine and predictability matter. Woblii is built to be reliable and consistent every single day.'
+          :'Woblii\'s consistent daily structure is useful for any brain that benefits from a clear predictable framework.'
+      }
+    }
+  },
+  bipolar:{
+    id:'bipolar',
+    title:'Bipolar Screening',
+    subtitle:'Mood Disorder Questionnaire (MDQ)',
+    intro:'These questions ask about experiences you may have had at any point in your life, not just recently. Answer yes if you have ever experienced something, even if things are different now.',
+    companion:'grumble',
+    compMsg:'These are direct questions. Answer honestly. Knowing is better than not knowing.',
+    icon:'🌫️',
+    questions:[
+      {id:'c1',text:'Has there ever been a period of time when you were not your usual self and you felt so good or so hyper that other people thought you were not your normal self, or you were so hyper that you got into trouble?',opts:['Yes','No']},
+      {id:'c2',text:'You were so irritable that you shouted at people or started fights or arguments?',opts:['Yes','No']},
+      {id:'c3',text:'You felt much more self-confident than usual?',opts:['Yes','No']},
+      {id:'c4',text:'You got much less sleep than usual and found you did not really miss it?',opts:['Yes','No']},
+      {id:'c5',text:'You were much more talkative or spoke much faster than usual?',opts:['Yes','No']},
+      {id:'c6',text:'Thoughts raced through your head or you could not slow your mind down?',opts:['Yes','No']},
+      {id:'c7',text:'You were so easily distracted by things around you that you had trouble concentrating or staying on track?',opts:['Yes','No']},
+      {id:'c8',text:'You had much more energy than usual?',opts:['Yes','No']},
+      {id:'c9',text:'You were much more active or did many more things than usual?',opts:['Yes','No']},
+      {id:'c10',text:'You were much more social or outgoing than usual — for example, you telephoned friends in the middle of the night?',opts:['Yes','No']},
+      {id:'c11',text:'You were much more interested in sex than usual?',opts:['Yes','No']},
+      {id:'c12',text:'You did things that were unusual for you or that other people might have thought were foolish or risky?',opts:['Yes','No']},
+      {id:'c13',text:'Spending money got you or your family into trouble?',opts:['Yes','No']}
+    ],
+    score(answers){
+      return Object.values(answers).filter(v=>v==='Yes').length;
+    },
+    result(score){
+      const threshold=score>=7;
+      return{
+        score,
+        max:13,
+        threshold,
+        headline:threshold?'Your responses are consistent with a bipolar spectrum pattern':'Your responses are below the clinical threshold',
+        detail:threshold
+          ?'Seven or more yes answers on the MDQ is associated with bipolar spectrum conditions. This is a screening tool, not a diagnosis. Many people with bipolar have gone years without knowing — particularly if their episodes have been primarily hypomanic rather than fully manic. This result is worth discussing with a GP.'
+          :'Your responses do not reach the clinical threshold on this screening. Mood variability is a spectrum and this tool captures one part of it.',
+        woblii:threshold
+          ?'The five-state system in Woblii — including Lit Up with its Voltage Box and containment mode — is designed specifically for the kind of energy and mood variability that comes with bipolar. You are in exactly the right place.'
+          :'The mood-state check-in and energy jar are useful for anyone whose capacity shifts significantly from day to day.'
+      }
+    }
+  },
+  dyslexia:{
+    id:'dyslexia',
+    title:'Dyslexia Checklist',
+    subtitle:'Adult Dyslexia Indicators',
+    intro:'A practical checklist of common experiences associated with dyslexia in adults. This is not a validated clinical instrument but reflects widely recognised patterns.',
+    companion:'colin',
+    compMsg:'Straightforward questions. Just answer based on your actual experience. No scores to pass or fail.',
+    icon:'🌤️',
+    questions:[
+      {id:'d1',text:'Do you find it difficult to read text accurately, often losing your place or re-reading the same line?',opts:['Rarely','Sometimes','Often','Very often']},
+      {id:'d2',text:'Do you find it hard to spell words correctly even when you know what the word means?',opts:['Rarely','Sometimes','Often','Very often']},
+      {id:'d3',text:'Do you often confuse similar-looking words when reading (e.g. "was" and "saw", "there" and "three")?',opts:['Rarely','Sometimes','Often','Very often']},
+      {id:'d4',text:'Do you find taking notes difficult because you cannot write fast enough to keep up?',opts:['Rarely','Sometimes','Often','Very often']},
+      {id:'d5',text:'Do you have difficulty with sequences — such as the months of the year, times tables, or following multi-step instructions?',opts:['Rarely','Sometimes','Often','Very often']},
+      {id:'d6',text:'Do you find it easier to understand things when they are explained verbally rather than in writing?',opts:['Rarely','Sometimes','Often','Very often']},
+      {id:'d7',text:'Do you often have difficulty with left and right, or get confused by directions?',opts:['Rarely','Sometimes','Often','Very often']},
+      {id:'d8',text:'Do you find it hard to concentrate on reading for extended periods?',opts:['Rarely','Sometimes','Often','Very often']}
+    ],
+    score(answers){
+      const weights={Rarely:0,Sometimes:1,Often:2,'Very often':3};
+      return Object.values(answers).reduce((s,v)=>s+(weights[v]||0),0);
+    },
+    result(score){
+      const threshold=score>=12;
+      const moderate=score>=6&&score<12;
+      return{
+        score,
+        max:24,
+        threshold,
+        headline:threshold?'Your responses suggest several dyslexia indicators':moderate?'Your responses suggest some dyslexia-related experiences':'Your responses suggest few dyslexia-related experiences',
+        detail:threshold
+          ?'A number of your responses are consistent with experiences commonly associated with dyslexia in adults. Many people with dyslexia are not diagnosed until adulthood. A formal assessment from an educational psychologist can confirm this — and in many cases opens access to support and adjustments.'
+          :moderate
+          ?'Some of your responses reflect experiences that can be associated with dyslexia, though not at a level that strongly suggests it. These experiences may have other causes, or may reflect a milder profile.'
+          :'Your responses do not suggest a strong dyslexia profile based on this checklist.',
+        woblii:threshold||moderate
+          ?'Woblii keeps text minimal and clear. Tasks are written in your own words. The one real thing is always visible. The app is designed to be scanned quickly rather than read in depth.'
+          :'Woblii works for any brain — the simple structure and minimal text keeps things accessible regardless of reading profile.'
+      }
+    }
+  }
+};
+
+const SCREENING_ORDER=['adhd','autism','bipolar','dyslexia'];
+
+// ================================================================
+// SCREENING SCREENS
+// ================================================================
+function rScreeningHub(fromOnboarding=false){
+  const profile=userPrefs?.brain_profile||{};
+  const cards=SCREENING_ORDER.map(id=>{
+    const s=SCREENINGS[id];
+    const done=profile[id]!==undefined;
+    return`<div class="screening-hub-card" onclick="startScreening('${id}',${fromOnboarding})">
+      <div class="shub-icon">${s.icon}</div>
+      <div class="shub-info">
+        <div class="shub-title">${s.title}</div>
+        <div class="shub-desc">${s.subtitle} · ${s.questions.length} questions</div>
+      </div>
+      <div class="shub-badge ${done?'done':'todo'}">${done?'Done':'Start'}</div>
+    </div>`;
+  }).join('');
+  const allDone=SCREENING_ORDER.every(id=>profile[id]!==undefined);
+  const anyDone=SCREENING_ORDER.some(id=>profile[id]!==undefined);
+  return`<div class="screening-screen" style="display:flex;flex-direction:column">
+    <div class="top-nav" style="max-width:480px;margin:0 auto;width:100%;padding:18px 22px 0">
+      <button class="btn-icon" onclick="${fromOnboarding?'skipScreening()':'back()'}">←</button>
+      <div style="text-align:right">
+        <div class="heading" style="font-size:1.3rem">Your <em>brain</em></div>
+        <p class="muted" style="font-size:.72rem">${anyDone?'Come back any time to complete the rest':'Optional · skip any time'}</p>
+      </div>
+    </div>
+    <div class="scroll-area"><div class="screening-inner" style="padding-top:20px">
+      <p class="body-text" style="margin-bottom:8px;font-size:.88rem">These are validated screening tools used in clinical settings. They cannot diagnose anything. What they can do is reflect your experience back to you in a way that might be useful.</p>
+      <p class="muted" style="font-size:.77rem;margin-bottom:24px">Take as many or as few as you like. Your results are saved privately to your account.</p>
+      ${cards}
+      ${fromOnboarding?`<div class="gap"></div><button class="btn btn-ghost btn-full" onclick="skipScreening()">Skip for now — I can do this later</button>`
+      :`${allDone?`<div class="card-sm" style="text-align:center;margin-top:8px;border-color:var(--teal-dim)"><p class="body-text" style="font-size:.82rem;color:var(--teal)">All four complete. Your results are saved.</p></div>`:''}`}
+    </div></div>
+  </div>`
+}
+
+function rScreeningQuestions(sid,fromOnboarding){
+  const s=SCREENINGS[sid];if(!s)return'';
+  const allAnswered=s.questions.every(q=>screeningAnswers[q.id]!==undefined);
+  const comp=COMP_CFG[s.companion];
+  return`<div class="screening-screen" style="display:flex;flex-direction:column">
+    <div class="top-nav" style="max-width:480px;margin:0 auto;width:100%;padding:18px 22px 0">
+      <button class="btn-icon" onclick="go('screening-hub')">←</button>
+      <div style="text-align:right">
+        <div class="heading" style="font-size:1.1rem">${s.icon} ${s.title}</div>
+        <p class="muted" style="font-size:.7rem">${s.questions.length} questions</p>
+      </div>
+    </div>
+    <div class="scroll-area"><div class="screening-inner" style="padding-top:16px">
+      <div class="companion-mini" style="background:${comp.bg};border:1px solid ${comp.bd};margin-bottom:20px">
+        <div style="flex-shrink:0">${comp.svg(comp.miniSz)}</div>
+        <p style="font-size:.81rem;color:${comp.cl};line-height:1.42">${s.compMsg}</p>
+      </div>
+      <p class="muted" style="font-size:.78rem;margin-bottom:18px;font-style:italic">${s.intro}</p>
+      ${s.questions.map((q,i)=>`
+        <div class="screening-q">
+          <div class="qtext"><span style="color:var(--accent);font-weight:500">${i+1}.</span> ${q.text}</div>
+          <div class="screening-opts">
+            ${q.opts.map(o=>`<div class="screening-opt ${screeningAnswers[q.id]===o?'on':''}" onclick="answerScreening('${q.id}','${o}')">${o}</div>`).join('')}
+          </div>
+        </div>`).join('')}
+      <div class="gap"></div>
+      <button class="btn btn-primary btn-full" onclick="submitScreening('${sid}',${fromOnboarding})" ${!allAnswered?'disabled style="opacity:.4"':''}>See my results →</button>
+      <div class="gap-sm"></div>
+      <button class="btn btn-ghost btn-sm btn-full" onclick="go('screening-hub')" style="opacity:.6">Save and come back later</button>
+    </div></div>
+  </div>`
+}
+
+function rScreeningResult(sid,fromOnboarding){
+  const s=SCREENINGS[sid];if(!s)return'';
+  const profile=userPrefs?.brain_profile||{};
+  const res=profile[sid];if(!res)return'';
+  const nextIdx=SCREENING_ORDER.indexOf(sid)+1;
+  const nextId=SCREENING_ORDER[nextIdx];
+  const nextS=nextId?SCREENINGS[nextId]:null;
+  const pct=Math.round((res.score/res.max)*100);
+  return`<div class="screening-screen" style="display:flex;flex-direction:column">
+    <div class="top-nav" style="max-width:480px;margin:0 auto;width:100%;padding:18px 22px 0">
+      <button class="btn-icon" onclick="go('screening-hub')">${s.icon}</button>
+      <div style="text-align:right">
+        <div class="heading" style="font-size:1.1rem">${s.title} — Results</div>
+      </div>
+    </div>
+    <div class="scroll-area"><div class="screening-inner" style="padding-top:16px">
+      <div class="result-card">
+        <div class="result-score">${res.score}<span style="font-size:1.2rem;color:var(--text-muted)">/${res.max}</span></div>
+        <div class="result-label">${res.threshold?'Above threshold':'Below threshold'}</div>
+        <p style="font-family:var(--font-d);font-size:1.1rem;line-height:1.4;color:var(--text);margin-bottom:14px">${res.headline}</p>
+        <div class="result-insight">${res.detail}</div>
+        ${res.threshold?`<div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:var(--radius-sm);padding:10px 13px;font-size:.8rem;color:var(--accent);margin-top:10px;line-height:1.55">This result is for your own understanding. If you want to explore it further, your GP is a good starting point — you can show them this screen.</div>`:''}
+      </div>
+      <div class="result-woblii" style="margin-bottom:18px">${res.woblii}</div>
+      <div class="card-sm" style="border-style:dashed;text-align:center;opacity:.6;margin-bottom:20px">
+        <p class="body-text" style="font-size:.78rem;font-style:italic">This screening is saved privately to your Woblii account. You can view it any time from Your Brain.</p>
+      </div>
+      ${nextS?`<button class="btn btn-primary btn-full" onclick="startScreening('${nextId}',${fromOnboarding})" style="margin-bottom:9px">Next: ${nextS.title} →</button>`:''}
+      <button class="btn btn-ghost btn-full" onclick="${fromOnboarding?'skipScreening()':'back()'}">
+        ${fromOnboarding?'Continue to Woblii →':'Back to Your Brain'}
+      </button>
+    </div></div>
+  </div>`
+}
+
+function startScreening(sid,fromOnboarding=false){
+  // Use the global flag if set from onboarding hub
+  const isOnboarding=fromOnboarding||window._fromOnboarding||false;
+  screeningId=sid;
+  screeningAnswers={};
+  const saved=userPrefs?.brain_profile?.[sid+'_partial'];
+  if(saved)screeningAnswers={...saved};
+  const app=document.getElementById('app');
+  app.innerHTML=rScreeningQuestions(sid,isOnboarding);
+  requestAnimationFrame(()=>{const el=app.querySelector('.screening-screen');if(el){el.style.display='flex';el.classList.add('fade-in')}});
+}
+function answerScreening(qid,val){
+  screeningAnswers[qid]=val;
+  // Update just the options for this question without re-rendering everything
+  document.querySelectorAll(`[onclick^="answerScreening('${qid}'"]`).forEach(el=>{
+    el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${val}'`));
+  });
+  // Enable submit if all answered
+  const s=SCREENINGS[screeningId];
+  if(s){
+    const allDone=s.questions.every(q=>screeningAnswers[q.id]!==undefined);
+    const btn=document.querySelector('[onclick^="submitScreening"]');
+    if(btn){btn.disabled=!allDone;btn.style.opacity=allDone?'1':'.4';}
+  }
+}
+async function submitScreening(sid,fromOnboarding){
+  const s=SCREENINGS[sid];if(!s)return;
+  const score=s.score(screeningAnswers);
+  const res=s.result(score);
+  const profile=userPrefs?.brain_profile||{};
+  profile[sid]=res;
+  delete profile[sid+'_partial'];
+  await dbSavePrefs({brain_profile:profile});
+  // Show result screen
+  const app=document.getElementById('app');
+  app.innerHTML=rScreeningResult(sid,fromOnboarding);
+  requestAnimationFrame(()=>{const el=app.querySelector('.screening-screen');if(el){el.style.display='flex';el.classList.add('fade-in')}});
+}
+function skipScreening(){
+  // Mark that they have seen the screening hub so we don't push them back
+  dbSavePrefs({screening_complete:true}).catch(()=>{});
+  userPrefs={...userPrefs,screening_complete:true};
+  nextOnboard();
+}
+
+// ================================================================
 // INIT
 document.addEventListener('DOMContentLoaded',()=>{
   go('loading');
