@@ -292,7 +292,15 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .msg-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-soft);font-family:var(--font-b);font-size:.82rem;padding:8px 12px;outline:none;resize:none;line-height:1.5;min-height:60px;font-style:italic;transition:border-color .2s}
 .msg-input:focus{border-color:var(--accent-dim)}.msg-input::placeholder{color:var(--text-muted);opacity:.6}
 
-/* MONTHLY ASSESSMENTS */
+/* ORT SUGGESTIONS */
+.ort-suggestions{margin-top:12px;display:none}
+.ort-suggestions.open{display:block}
+.ort-cat-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ort-cat-chip{padding:4px 11px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:.68rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--text-muted);transition:all .2s;-webkit-tap-highlight-color:transparent;font-family:var(--font-b)}
+.ort-cat-chip:hover,.ort-cat-chip.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.ort-pills{display:flex;gap:6px;flex-wrap:wrap;animation:fadeIn .2s ease both}
+.ort-pill{padding:6px 12px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:.8rem;cursor:pointer;color:var(--text-soft);transition:all .2s;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;line-height:1.3}
+.ort-pill:hover{background:var(--teal-dim);border-color:var(--teal);color:var(--teal)}
 .assessment-modal{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);z-index:600;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .25s ease both}
 .assessment-sheet{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;padding:26px 22px 44px;max-width:540px;width:100%;animation:slideUp .32s cubic-bezier(.34,1.2,.64,1) both;max-height:88vh;overflow-y:auto}
 .assessment-q{padding:12px 0;border-bottom:1px solid var(--border)}.assessment-q:last-child{border-bottom:none}
@@ -1479,6 +1487,16 @@ function rDay(){
           ${t.ortDone?`<span style="color:var(--success);font-size:.83rem;flex-shrink:0">✓ Done</span>`:`<button class="btn btn-sm btn-teal" onclick="toggleORT()" style="flex-shrink:0">Done ✓</button>`}
         </div>
         <input type="text" class="ort-input" id="ort-input" placeholder="What is the one thing that matters today?" value="${t.oneRealThing||''}" onchange="saveORT(this.value)" maxlength="100" ${t.ortDone?'readonly':''}>
+        ${!t.ortDone?`
+        <div style="margin-top:10px">
+          <button onclick="toggleOrtSuggestions()" style="background:none;border:none;font-size:.72rem;color:var(--text-muted);cursor:pointer;padding:0;font-family:var(--font-b);display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+            <span id="ort-suggest-arrow">▾</span> Not sure where to start?
+          </button>
+          <div class="ort-suggestions" id="ort-suggest-box">
+            <div class="ort-cat-chips" id="ort-cat-chips"></div>
+            <div class="ort-pills" id="ort-pills"></div>
+          </div>
+        </div>`:''}
       </div>
       <div class="sec-label">Energy jar ${jarSize!==st.jar?`<span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:.7rem;color:var(--text-muted)">adjusted to ${jarSize} drops</span>`:''}</div>
       <div class="card" style="margin-bottom:18px">
@@ -3081,6 +3099,147 @@ function rWobbleOver(){
     </div>
     <div class="pixel" style="font-size:.38rem;color:#222;margin-top:20px">HP REMAINING — YOU: ${gs.playerHP} · ${npc.name.toUpperCase()}: ${gs.npcHP}</div>
   </div>`;
+}
+
+// ================================================================
+// ORT SUGGESTIONS
+// ================================================================
+const ORT_SUGGESTIONS={
+  body:{
+    label:'Body',
+    items:[
+      'Drink a full glass of water',
+      'Eat something — anything',
+      'Take my medication',
+      'Have a shower or wash my face',
+      'Get dressed, even just into different clothes',
+      'Brush my teeth',
+      'Open a window or step outside for 60 seconds',
+      'Rest properly for 20 minutes'
+    ]
+  },
+  movement:{
+    label:'Movement',
+    items:[
+      'Walk around the block',
+      'Stretch for five minutes',
+      'Go outside, even just to the front door',
+      'Move to a different room for a while',
+      'Stand up and shake it out',
+      'Walk to the end of the street and back'
+    ]
+  },
+  communication:{
+    label:'Communication',
+    items:[
+      'Reply to one message I\'ve been avoiding',
+      'Send one email I\'ve been putting off',
+      'Call someone back',
+      'Text someone to check in',
+      'Read one message and acknowledge it'
+    ]
+  },
+  environment:{
+    label:'Environment',
+    items:[
+      'Wash one cup or plate',
+      'Clear one surface',
+      'Put one thing away',
+      'Open the curtains',
+      'Make the bed or straighten the duvet',
+      'Take out one piece of rubbish'
+    ]
+  },
+  admin:{
+    label:'Admin',
+    items:[
+      'Make one phone call I\'ve been avoiding',
+      'Pay one bill or check one account',
+      'Book one appointment',
+      'Write down one thing I need to remember',
+      'Reply to one official letter or email'
+    ]
+  },
+  connection:{
+    label:'Connection',
+    items:[
+      'Tell someone one true thing about today',
+      'Ask someone how they are',
+      'Spend time with an animal',
+      'Do something alongside another person, even silently',
+      'Message one person I haven\'t spoken to in a while'
+    ]
+  },
+  self:{
+    label:'Self',
+    items:[
+      'Write down one thing that is worrying me',
+      'Read for ten minutes',
+      'Do one thing I actually enjoy',
+      'Sit without a screen for five minutes',
+      'Make a hot drink and drink it slowly',
+      'Listen to one song I love'
+    ]
+  }
+};
+
+// State-aware category ordering
+function ortCategoryOrder(state){
+  if(state==='flat'||state==='fragile')
+    return['body','environment','movement','self','connection','communication','admin'];
+  if(state==='lit-up'||state==='energised')
+    return['admin','communication','connection','body','movement','environment','self'];
+  return['body','communication','movement','environment','admin','connection','self'];
+}
+
+let ortActiveCat='';
+
+function toggleOrtSuggestions(){
+  const box=document.getElementById('ort-suggest-box');
+  if(!box)return;
+  const open=box.classList.toggle('open');
+  if(open&&!ortActiveCat){
+    // Auto-select first category for current state
+    const order=ortCategoryOrder(todayData.state);
+    ortActiveCat=order[0];
+    renderOrtPills();
+    renderOrtCats();
+  }
+}
+
+function selectOrtCat(cat){
+  ortActiveCat=cat;
+  renderOrtCats();
+  renderOrtPills();
+}
+
+function renderOrtCats(){
+  const order=ortCategoryOrder(todayData.state);
+  const container=document.getElementById('ort-cat-chips');
+  if(!container)return;
+  container.innerHTML=order.map(id=>{
+    const c=ORT_SUGGESTIONS[id];
+    return`<div class="ort-cat-chip ${ortActiveCat===id?'on':''}" onclick="selectOrtCat('${id}')">${c.label}</div>`;
+  }).join('');
+}
+
+function renderOrtPills(){
+  const container=document.getElementById('ort-pills');
+  if(!container||!ortActiveCat)return;
+  const items=ORT_SUGGESTIONS[ortActiveCat]?.items||[];
+  container.innerHTML=items.map(s=>
+    `<div class="ort-pill" onclick="pickOrtSuggestion(${JSON.stringify(s)})">${s}</div>`
+  ).join('');
+}
+
+function pickOrtSuggestion(text){
+  const input=document.getElementById('ort-input');
+  if(input){input.value=text;saveORT(text);}
+  // Close suggestions
+  const box=document.getElementById('ort-suggest-box');
+  if(box)box.classList.remove('open');
+  ortActiveCat='';
+  toast('Added. Make it yours if you want.');
 }
 
 // ================================================================
