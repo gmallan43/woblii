@@ -1078,13 +1078,27 @@ function rOnboardScreeningIntro(dots){
 </div>`}
 
 function startOnboardScreening(){
-  // Show the screening hub with fromOnboarding=true
   const app=document.getElementById('app');
   app.innerHTML=rScreeningHub(true);
   requestAnimationFrame(()=>{const el=app.querySelector('.screening-screen');if(el){el.style.display='flex';el.classList.add('fade-in')}});
-  // Override startScreening to pass fromOnboarding=true
   window._fromOnboarding=true;
 }
+
+function rOnboardName(dots){return`<div class="onboard-screen" style="display:flex">
+  <div class="onboard-inner">
+    <div class="onboard-progress">${dots}</div>
+    <div class="heading" style="margin-bottom:8px">One last thing<em>.</em></div>
+    <p class="body-text" style="margin-bottom:8px">What would you like your companions to call you?</p>
+    <p class="muted" style="font-size:.78rem;margin-bottom:28px">Could be your name, a nickname, anything you like. Completely optional.</p>
+    <input type="text" class="text-input" id="name-input" placeholder="What shall we call you?" maxlength="30" style="font-size:1.1rem;text-align:center;font-family:var(--font-d)">
+    <div class="spacer"></div>
+    <button class="btn btn-primary btn-full" onclick="saveOnboardName()" style="margin-top:28px">That's me →</button>
+    <div class="gap-sm"></div>
+    <button class="btn btn-ghost btn-sm btn-full" onclick="nextOnboard()" style="opacity:.55">Skip this</button>
+    <div class="gap-sm"></div>
+    <button class="btn btn-ghost btn-sm btn-full" onclick="prevOnboard()">← Back</button>
+  </div>
+</div>`}
   <div class="onboard-inner">
     <div class="onboard-progress">${dots}</div>
     <div class="heading" style="margin-bottom:8px">One last thing<em>.</em></div>
@@ -1197,6 +1211,7 @@ function rWelcome(){
     </div>
   </div>`
 }
+function rReturn(){
   const comp=STATES.find(s=>s.id==(todayData?.state||'steady'))?.companion||'colin';
   const mini=compMini(comp,MSG[comp]?.return||'Good to have you back.');
   const n=userName();
