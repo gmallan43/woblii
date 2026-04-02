@@ -263,7 +263,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 
 /* ONBOARDING */
 .onboard-screen{min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
-.onboard-inner{max-width:480px;width:100%;margin:0 auto;padding:60px 24px;flex:1;display:flex;flex-direction:column}
+.onboard-inner{max-width:480px;width:100%;margin:0 auto;padding:50px 24px 60px;flex:1;display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .onboard-progress{display:flex;gap:6px;margin-bottom:40px}
 .onboard-dot{height:3px;border-radius:2px;background:var(--border);transition:all .4s;flex:1}
 .onboard-dot.act{background:var(--accent)}
@@ -1020,7 +1020,7 @@ function rOnboardWelcome(dots){return`<div class="onboard-screen" style="display
     </div>
     <p class="body-text" style="margin-bottom:20px">They worked for a while. Then a hard week happened, and coming back felt like facing evidence of everything you didn't do.</p>
     <p class="body-text" style="margin-bottom:40px">Woblii is built differently. <strong style="color:var(--text)">It doesn't keep score. It doesn't have streaks.</strong> It just meets you where you are, every day, including the bad ones.</p>
-    <div class="spacer"></div>
+    <div class="gap-lg"></div>
     <button class="btn btn-primary btn-full" onclick="nextOnboard()">Tell me more →</button>
   </div>
 </div>`}
@@ -1043,7 +1043,7 @@ function rOnboardCompanions(dots){
       <p>${quote}</p>
     </div>
     <p class="muted" style="font-size:.75rem;margin-top:12px;text-align:center">${c.defaultName} appears on your <strong>${c.state}</strong> days.</p>
-    <div class="spacer"></div>
+    <div class="gap-lg"></div>
     <button class="btn btn-primary btn-full" onclick="nextOnboard()" style="margin-top:20px">Continue →</button>
     <div class="gap-sm"></div>
     <button class="btn btn-ghost btn-sm btn-full" onclick="prevOnboard()">← Back</button>
@@ -1068,7 +1068,7 @@ function rOnboardScreeningIntro(dots){
         </div>`;
       }).join('')}
     </div>
-    <div class="spacer"></div>
+    <div class="gap-lg"></div>
     <button class="btn btn-primary btn-full" onclick="startOnboardScreening()">Start the screenings →</button>
     <div class="gap-sm"></div>
     <button class="btn btn-ghost btn-sm btn-full" onclick="nextOnboard()" style="opacity:.6">Skip for now — I can do this later</button>
@@ -1091,7 +1091,7 @@ function rOnboardName(dots){return`<div class="onboard-screen" style="display:fl
     <p class="body-text" style="margin-bottom:8px">What would you like your companions to call you?</p>
     <p class="muted" style="font-size:.78rem;margin-bottom:28px">Could be your name, a nickname, anything you like. Completely optional.</p>
     <input type="text" class="text-input" id="name-input" placeholder="What shall we call you?" maxlength="30" style="font-size:1.1rem;text-align:center;font-family:var(--font-d)">
-    <div class="spacer"></div>
+    <div class="gap-lg"></div>
     <button class="btn btn-primary btn-full" onclick="saveOnboardName()" style="margin-top:28px">That's me →</button>
     <div class="gap-sm"></div>
     <button class="btn btn-ghost btn-sm btn-full" onclick="nextOnboard()" style="opacity:.55">Skip this</button>
@@ -1113,8 +1113,8 @@ function rOnboardNotifications(dots){
     <div class="card-sm" style="margin-top:12px;border-style:dashed;opacity:.65">
       <p class="body-text" style="font-size:.8rem;font-style:italic">Example: <em>"Still here. Whenever you're ready. — Grumble"</em></p>
     </div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary btn-full" onclick="saveOnboardNotifications()" style="margin-top:20px">Continue →</button>
+    <div class="gap"></div>
+    <button class="btn btn-primary btn-full" onclick="saveOnboardNotifications()" style="margin-top:12px">Continue →</button>
     <div class="gap-sm"></div>
     <button class="btn btn-ghost btn-sm btn-full" onclick="prevOnboard()">← Back</button>
   </div>
@@ -1130,7 +1130,7 @@ function rOnboardReady(dots){
     </div>
     <p class="body-text" style="margin-bottom:16px;max-width:340px;margin-inline:auto">Woblii works best when you come back after you've been away. Not just on the good days.</p>
     <p class="body-text" style="margin-bottom:40px;max-width:340px;margin-inline:auto">If you disappear for a week and come back, nothing will have changed except that your companions missed you. That's it.</p>
-    <div class="spacer"></div>
+    <div class="gap-lg"></div>
     <button class="btn btn-primary" onclick="completeOnboarding()" style="font-size:1rem;padding:15px 36px">Open today →</button>
   </div>
 </div>`}
