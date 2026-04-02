@@ -292,7 +292,45 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .msg-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-soft);font-family:var(--font-b);font-size:.82rem;padding:8px 12px;outline:none;resize:none;line-height:1.5;min-height:60px;font-style:italic;transition:border-color .2s}
 .msg-input:focus{border-color:var(--accent-dim)}.msg-input::placeholder{color:var(--text-muted);opacity:.6}
 
-/* SCREENING */
+/* MONTHLY ASSESSMENTS */
+.assessment-modal{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);z-index:600;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .25s ease both}
+.assessment-sheet{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;padding:26px 22px 44px;max-width:540px;width:100%;animation:slideUp .32s cubic-bezier(.34,1.2,.64,1) both;max-height:88vh;overflow-y:auto}
+.assessment-q{padding:12px 0;border-bottom:1px solid var(--border)}.assessment-q:last-child{border-bottom:none}
+.assessment-q .aqtext{font-size:.88rem;color:var(--text);line-height:1.5;margin-bottom:10px}
+.assessment-opts{display:flex;gap:5px;flex-wrap:wrap}
+.assessment-opt{padding:5px 11px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:.72rem;cursor:pointer;color:var(--text-soft);transition:all .2s;font-family:var(--font-b)}
+.assessment-opt.on{background:var(--teal-dim);border-color:var(--teal);color:var(--teal)}
+.score-track{display:flex;gap:6px;align-items:center;margin:8px 0}
+.score-track-bar{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.score-track-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.month-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-size:.7rem;font-weight:500;letter-spacing:.06em}
+
+/* WOT / DISSOCIATION */
+.wot-opts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.wot-opt{flex:1;min-width:140px;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;text-align:center;font-size:.82rem;color:var(--text-soft);-webkit-tap-highlight-color:transparent;line-height:1.4}
+.wot-opt:hover{border-color:var(--accent-dim)}.wot-opt.on{background:var(--teal-dim);border-color:var(--teal);color:var(--teal)}
+.wot-opt .wot-icon{font-size:1.4rem;display:block;margin-bottom:5px}
+.dissoc-opts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.dissoc-opt{flex:1;min-width:130px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;text-align:center;font-size:.8rem;color:var(--text-soft);-webkit-tap-highlight-color:transparent;line-height:1.4}
+.dissoc-opt.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+/* SENSORY */
+.sensory-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}.sensory-row:last-child{border-bottom:none}
+.sensory-row .sq{flex:1;font-size:.85rem}
+.sensor-opts{display:flex;gap:5px}
+.sopt-s{padding:5px 9px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:.72rem;cursor:pointer;color:var(--text-soft);transition:all .2s;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.sopt-s.on{background:var(--teal-dim);border-color:var(--teal);color:var(--teal)}
+
+/* ACTIVATION */
+.activation-opts{display:flex;gap:8px;margin-top:10px}
+.act-opt{flex:1;padding:10px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;text-align:center;font-size:.8rem;color:var(--text-soft);transition:all .2s;-webkit-tap-highlight-color:transparent}
+.act-opt.on{background:var(--success);border-color:var(--success);color:white}
+.act-opt.same.on{background:var(--teal);border-color:var(--teal);color:white}
+.act-opt.harder.on{background:var(--voltage);border-color:var(--voltage);color:white}
+
+/* SLEEP HOURS */
+.sleep-hours-input{width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-d);font-size:1.4rem;font-weight:300;padding:6px 10px;outline:none;text-align:center;transition:border-color .2s}
+.sleep-hours-input:focus{border-color:var(--accent-dim)}
 .screening-screen{min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
 .screening-inner{max-width:480px;width:100%;margin:0 auto;padding:50px 24px 60px;flex:1;display:flex;flex-direction:column}
 .screening-q{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:10px;transition:border .2s}
@@ -681,13 +719,15 @@ function getMsgPool(type,state){
 // ================================================================
 let currentUser=null,todayData=null,evidenceItems=[],userPrefs=null,allDays=[];
 let glucoseData=null;
-let tmp={state:'',body:{},size:'small'};
+let tmp={state:'',body:{},size:'small',wot:'',dissociation:false,sensory:{},sleepHours:null};
 let pendingEmail='',middayNew='',saveTimer=null,syncing=false;
 let onboardStep=0,selectedEmailTime='08:00',emailEnabled=true;
 let activeCompIntro='grumble';
 let screeningId='',screeningAnswers={},screeningResults={};
+let monthlyAssessments=[];
+let currentAssessmentType='',currentAssessmentAnswers={};
 
-function freshToday(){return{date:TODAY,state:'',body:{},oneRealThing:'',ortDone:false,tasks:[],voltageBox:[],close:null}}
+function freshToday(){return{date:TODAY,state:'',body:{},oneRealThing:'',ortDone:false,tasks:[],voltageBox:[],close:null,wot:'',dissociation:false,sensory:{},activationClose:'',sleepHours:null}}
 
 // ================================================================
 // SUPABASE
@@ -696,10 +736,22 @@ async function dbLoadToday(){const{data}=await sb.from('daily_entries').select('
 async function dbSaveToday(){
   if(!currentUser||!todayData)return;
   syncing=true;setSyncDot(true);
-  await sb.from('daily_entries').upsert({user_id:currentUser.id,date:TODAY,state:todayData.state,body:todayData.body,one_real_thing:todayData.oneRealThing,ort_done:todayData.ortDone,tasks:todayData.tasks,voltage_box:todayData.voltageBox,close:todayData.close},{onConflict:'user_id,date'});
+  await sb.from('daily_entries').upsert({
+    user_id:currentUser.id,date:TODAY,
+    state:todayData.state,body:todayData.body,
+    one_real_thing:todayData.oneRealThing,ort_done:todayData.ortDone,
+    tasks:todayData.tasks,voltage_box:todayData.voltageBox,close:todayData.close,
+    wot:todayData.wot||'',dissociation:todayData.dissociation||false,
+    sensory:todayData.sensory||{},activation_close:todayData.activationClose||'',
+    sleep_hours:todayData.sleepHours||null
+  },{onConflict:'user_id,date'});
   syncing=false;setSyncDot(false);
 }
-async function dbLoadAllDays(){const{data}=await sb.from('daily_entries').select('date,state,body,ort_done,tasks').order('date',{ascending:false}).limit(90);return data||[]}
+async function dbLoadAllDays(){const{data}=await sb.from('daily_entries').select('date,state,body,ort_done,tasks,wot,dissociation,sensory,activation_close,sleep_hours').order('date',{ascending:false}).limit(90);return data||[]}
+async function dbLoadMonthlyAssessments(){const{data}=await sb.from('monthly_assessments').select('*').order('created_at',{ascending:false}).limit(24);return data||[]}
+async function dbSaveMonthlyAssessment(month,type,answers,score){
+  await sb.from('monthly_assessments').upsert({user_id:currentUser.id,month,type,answers,score},{onConflict:'user_id,month,type'});
+}
 async function dbLoadEvidence(){const{data}=await sb.from('evidence_wall').select('*').order('created_at',{ascending:false});return data||[]}
 async function dbAddEvidence(text,date){const{data}=await sb.from('evidence_wall').insert({user_id:currentUser.id,text,entry_date:date}).select().single();return data}
 async function dbDeleteEvidence(id){await sb.from('evidence_wall').delete().eq('id',id)}
@@ -876,13 +928,23 @@ function generateInsights(days){
 // ================================================================
 async function loadUserData(){
   function safe(p,fb){return Promise.race([p.catch(()=>fb),new Promise(r=>setTimeout(()=>r(fb),6000))])}
-  const[row,ev,prefs,days]=await Promise.all([
-    safe(dbLoadToday(),null),safe(dbLoadEvidence(),[]),safe(dbLoadPrefs(),null),safe(dbLoadAllDays(),[])
+  const[row,ev,prefs,days,assessments]=await Promise.all([
+    safe(dbLoadToday(),null),safe(dbLoadEvidence(),[]),safe(dbLoadPrefs(),null),
+    safe(dbLoadAllDays(),[]),safe(dbLoadMonthlyAssessments(),[])
   ]);
-  todayData=row?{date:row.date,state:row.state||'',body:row.body||{},oneRealThing:row.one_real_thing||'',ortDone:row.ort_done||false,tasks:row.tasks||[],voltageBox:row.voltage_box||[],close:row.close||null}:freshToday();
+  todayData=row?{
+    date:row.date,state:row.state||'',body:row.body||{},
+    oneRealThing:row.one_real_thing||'',ortDone:row.ort_done||false,
+    tasks:row.tasks||[],voltageBox:row.voltage_box||[],close:row.close||null,
+    wot:row.wot||'',dissociation:row.dissociation||false,
+    sensory:row.sensory||{},activationClose:row.activation_close||'',
+    sleepHours:row.sleep_hours||null
+  }:freshToday();
   evidenceItems=ev||[];userPrefs=prefs||{};allDays=days||[];
+  monthlyAssessments=assessments||[];
   if(userPrefs.libre_email)fetchGlucose().then(g=>{glucoseData=g}).catch(()=>{});
   checkDailyEmail().catch(()=>{});
+  checkMonthlyAssessment();
   if(!userPrefs.onboarding_complete){go('onboarding');return}
   if(todayData.state){document.body.dataset.state=todayData.state;go('day');return}
   const lastDate=await safe(dbGetLastDate(),null);
@@ -1183,11 +1245,13 @@ function rWelcome(){
   const n=userName();
   const g=HOUR<12?'morning':HOUR<17?'afternoon':'evening';
   const hasAnyScreening=SCREENING_ORDER.some(id=>userPrefs?.brain_profile?.[id]!==undefined);
+  const showMonthly=window._monthlyDue&&allDays.length>=7;
   return`<div class="screen" style="display:flex">
     <div class="screen-inner" style="justify-content:center;text-align:center">
       <div class="logo" style="animation:fadeIn .8s both">Woblii</div>
       <div class="display" style="margin-bottom:14px;animation:fadeIn .8s .14s both">Good ${g}${n?`, <em>${n}</em>`:'.'}${n?'':''}</div>
-      <p class="body-text" style="margin-bottom:44px;max-width:290px;margin-inline:auto;animation:fadeIn .8s .28s both">Before the day, let's find out where you actually are.</p>
+      <p class="body-text" style="margin-bottom:${showMonthly?'20px':'44px'};max-width:290px;margin-inline:auto;animation:fadeIn .8s .28s both">Before the day, let's find out where you actually are.</p>
+      ${showMonthly?`<div style="max-width:360px;margin:0 auto 24px;text-align:left;animation:fadeIn .8s .36s both">${rMonthlyPrompt()}</div>`:''}
       <button class="btn btn-primary" onclick="startDay()" style="animation:fadeIn .8s .42s both">Begin →</button>
       <br><br>
       <button class="btn btn-ghost btn-sm" onclick="go('night')" style="opacity:.4;animation:fadeIn .8s .56s both">🌙 Night mode</button>
@@ -1227,7 +1291,30 @@ function rStateCheck(){
       <p class="body-text" style="margin-bottom:22px">Not who you should be. Who you actually are right now.</p>
       <div class="state-grid">${btns}</div>
       ${sel?`<div class="card-sm" style="border-color:var(--accent-dim);margin-bottom:10px"><p class="body-text" style="font-size:.83rem">${sel.desc}</p><p class="body-text" style="font-size:.8rem;margin-top:5px"><span style="color:var(--accent)">Energy jar today:</span> ${sel.jar} drops.${sel.containment?' <span style="color:var(--voltage)"> Containment mode on.</span>':''}</p></div>${mini}`:'<div style="height:70px"></div>'}
-      <div class="spacer"></div>
+      ${tmp.state==='flat'||tmp.state==='fragile'?`
+        <div class="card" style="margin-bottom:10px">
+          <p class="label" style="margin-bottom:8px">Which feels closer right now?</p>
+          <div class="wot-opts">
+            <div class="wot-opt ${tmp.wot==='hyper'?'on':''}" onclick="selWot('hyper')">
+              <span class="wot-icon">⚡</span>Racing thoughts, restless, can't settle
+            </div>
+            <div class="wot-opt ${tmp.wot==='hypo'?'on':''}" onclick="selWot('hypo')">
+              <span class="wot-icon">🌊</span>Numb, distant, very slow, hard to feel
+            </div>
+            <div class="wot-opt ${tmp.wot==='neither'?'on':''}" onclick="selWot('neither')">
+              <span class="wot-icon">·</span>Neither of these quite fits
+            </div>
+          </div>
+        </div>
+        ${tmp.state==='flat'&&tmp.wot?`
+        <div class="card" style="margin-bottom:10px">
+          <p class="label" style="margin-bottom:6px">Does flat feel more like:</p>
+          <div class="dissoc-opts">
+            <div class="dissoc-opt ${tmp.dissociation===false&&tmp.wot?'on':''}" onclick="selDissoc(false)">Heaviness and low mood</div>
+            <div class="dissoc-opt ${tmp.dissociation===true?'on':''}" onclick="selDissoc(true)">Watching yourself from a distance</div>
+          </div>
+        </div>`:''}`:''}
+      <div class="gap"></div>
       <button class="btn btn-primary btn-full" onclick="goBody()" ${!tmp.state?'disabled style="opacity:.4"':''}>Continue →</button>
     </div>
   </div>`
@@ -1244,20 +1331,31 @@ function rBodyCheck(){
   ];
   const done=rows.every(r=>tmp.body[r.f]);
   const note=bodyNote();
+  const showSensory=userPrefs?.sensory_tracking||userPrefs?.brain_profile?.autism?.threshold;
+  const S=(f,cs)=>cs.map(c=>`<div class="sopt-s ${tmp.sensory?.[f]===c.v?'on':''}" onclick="selSensory('${f}','${c.v}')">${c.l}</div>`).join('');
   return`<div class="screen" style="display:flex">
-    <div class="screen-inner">
+    <div class="scroll-area"><div class="screen-inner">
       <div class="logo">Woblii</div>
       <div class="pdots"><div class="pdot dn"></div><div class="pdot act"></div><div class="pdot"></div></div>
       <div class="heading" style="margin-bottom:8px">How's your <em>body?</em></div>
       <p class="body-text" style="margin-bottom:22px">Your brain runs on your body. This shapes what we ask today.</p>
-      <div class="card">${rows.map(r=>`<div class="body-row"><span class="q">${r.q}</span><div class="bopts">${O(r.f,r.cs)}</div></div>`).join('')}</div>
+      <div class="card">
+        ${rows.map(r=>`<div class="body-row"><span class="q">${r.q}</span><div class="bopts">${O(r.f,r.cs)}</div></div>`).join('')}
+        ${tmp.body.sleep==='poor'?`<div class="body-row"><span class="q">Roughly how many hours?</span><input type="number" class="sleep-hours-input" id="sleep-hrs" min="0" max="12" step=".5" placeholder="hrs" value="${tmp.sleepHours||''}" onchange="tmp.sleepHours=parseFloat(this.value)||null"></div>`:''}
+      </div>
       ${done&&note?`<div class="card-sm" style="border-color:var(--teal-dim)"><p class="body-text" style="font-size:.8rem;color:var(--teal)">${note}</p></div>`:''}
-      <div class="spacer"></div>
+      ${showSensory?`
+      <div class="sec-label" style="margin-top:4px">Sensory environment</div>
+      <div class="card">
+        <div class="sensory-row"><span class="sq">Overall sensory comfort right now</span><div class="sensor-opts">${S('overall',[{v:'ok',l:'Fine'},{v:'some',l:'Some'},{v:'overwhelm',l:'A lot'}])}</div></div>
+        <div class="sensory-row"><span class="sq">Noise level</span><div class="sensor-opts">${S('noise',[{v:'quiet',l:'Quiet'},{v:'ok',l:'OK'},{v:'much',l:'Too much'}])}</div></div>
+        <div class="sensory-row"><span class="sq">Light</span><div class="sensor-opts">${S('light',[{v:'fine',l:'Fine'},{v:'bit',l:'A bit much'},{v:'hard',l:'Difficult'}])}</div></div>
+      </div>`:''}
       <div style="display:flex;gap:9px;margin-top:18px">
         <button class="btn btn-ghost" onclick="go('state-check')">← Back</button>
         <button class="btn btn-primary" style="flex:1" onclick="go('regulation')" ${!done?'disabled style="opacity:.4;flex:1"':''}>Continue →</button>
       </div>
-    </div>
+    </div></div>
   </div>`
 }
 
@@ -1274,8 +1372,31 @@ function bodyNote(){
 }
 
 function rRegulation(){
-  const g=GROUNDING[Math.floor(Math.random()*GROUNDING.length)];
   const isLow=['flat','fragile'].includes(tmp.state);
+  const isHyper=tmp.wot==='hyper';
+  const isHypo=tmp.wot==='hypo';
+  const isDissoc=tmp.dissociation===true;
+
+  // Select grounding exercise based on WOT
+  let g;
+  if(isDissoc){
+    g={title:'Grounding first',body:'Both feet flat on the floor. Press down firmly. Name five things you can touch right now. Cold water on your wrists if you can. You are in a specific place. You are safe. Take thirty seconds before anything else.'};
+  } else if(isHyper){
+    g={title:'Slow the body first',body:'In for four counts through the nose, hold for two, out for eight through the mouth. The longer exhale activates your parasympathetic system. Three times. Your nervous system needs to know it is safe before your brain can plan.'};
+  } else if(isHypo){
+    g={title:'Gentle activation',body:'Stand up if you can. Roll your shoulders back slowly. Three slow deep breaths. If you have cold water, put it on your wrists or face. We are waking the system gently, not forcing it.'};
+  } else {
+    g=GROUNDING[Math.floor(Math.random()*GROUNDING.length)];
+  }
+
+  const wotMsg=isDissoc
+    ?`<div class="card-sm" style="border-color:var(--danger);margin-bottom:14px"><p class="body-text" style="font-size:.82rem;color:var(--danger)">You mentioned feeling distant from yourself. Grounding is the priority right now. The day can wait.</p></div>`
+    :isHyper
+    ?`<div class="card-sm" style="border-color:var(--teal-dim);margin-bottom:14px"><p class="body-text" style="font-size:.82rem;color:var(--teal)">Racing thoughts noted. A slower exhale than inhale helps regulate the nervous system. Take the time with this one.</p></div>`
+    :isHypo
+    ?`<div class="card-sm" style="border-color:var(--teal-dim);margin-bottom:14px"><p class="body-text" style="font-size:.82rem;color:var(--teal)">Shutdown mode noted. We activate gently. No forcing. The system will come online at its own pace.</p></div>`
+    :'';
+
   return`<div class="reg-screen" style="display:flex">
     <div style="max-width:420px;width:100%;margin:0 auto;text-align:center">
       <div class="logo" style="margin-bottom:20px">Woblii</div>
@@ -1283,11 +1404,12 @@ function rRegulation(){
       <div class="heading" style="margin-bottom:6px">Before we begin</div>
       <p class="body-text" style="font-size:.87rem">Planning works better when the nervous system is ready.</p>
       <div class="breathe-circle">breathe</div>
+      ${wotMsg}
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;text-align:left;margin:0 0 26px">
         <p class="label" style="margin-bottom:9px">${g.title}</p>
         <p class="body-text" style="font-size:.87rem">${g.body}</p>
       </div>
-      <button class="btn btn-primary btn-full" onclick="goDay()" style="max-width:360px">${isLow?"I'm ready. Open the day.":"I've done this. Let's go."}</button>
+      <button class="btn btn-primary btn-full" onclick="goDay()" style="max-width:360px">${isLow||isDissoc?"I'm ready. Open the day.":"I've done this. Let's go."}</button>
       <br><br>
       <button class="btn btn-ghost btn-sm" onclick="goDay()" style="opacity:.4">Skip this</button>
     </div>
@@ -1421,7 +1543,7 @@ function taskHTML(tk){
 
 // PATTERN REFLECTION
 function rPatterns(){
-  const insights=generateInsights(allDays);
+  const insights=generateInsightsEnhanced(allDays,monthlyAssessments);
   const stateCounts={};
   STATES.forEach(s=>stateCounts[s.id]=0);
   allDays.slice(0,28).forEach(d=>{if(d.state)stateCounts[d.state]=(stateCounts[d.state]||0)+1});
@@ -1433,6 +1555,42 @@ function rPatterns(){
       <div class="state-bar-track"><div class="state-bar-fill" style="width:${Math.round((stateCounts[s.id]/maxCount)*100)}%;background:${stateColors[s.id]}"></div></div>
       <span class="state-bar-count">${stateCounts[s.id]}</span>
     </div>`).join('');
+
+  // Assessment scores section
+  const gadHistory=monthlyAssessments.filter(a=>a.type==='gad7').slice(0,4).reverse();
+  const phqHistory=monthlyAssessments.filter(a=>a.type==='phq9').slice(0,4).reverse();
+  const months=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mkBar=(a,max,c)=>{
+    const mo=a.month.slice(5);
+    const interp=MONTHLY[a.type].interpret(a.score);
+    const colors={minimal:'var(--success)',mild:'var(--teal)',moderate:'var(--accent)',severe:'var(--danger)','moderately-severe':'var(--voltage)'};
+    return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="font-size:.63rem;color:var(--text-muted)">${months[parseInt(mo)]}</div>
+      <div style="height:44px;width:100%;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:0;left:0;right:0;border-radius:4px;background:${colors[interp.level]||'var(--teal)'};height:${Math.round((a.score/max)*100)}%;opacity:.7;transition:height .6s"></div>
+      </div>
+      <div style="font-size:.68rem;color:var(--text-muted)">${a.score}</div>
+    </div>`;
+  };
+  const assessHTML=(gadHistory.length||phqHistory.length)?`
+    <div class="sec-label" style="margin-top:16px">Monthly checks</div>
+    ${gadHistory.length?`<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <p class="label">Anxiety — GAD-7</p>
+        <button class="btn btn-ghost btn-sm" onclick="startMonthlyAssessment('gad7')" style="font-size:.7rem">Retake</button>
+      </div>
+      <div style="display:flex;gap:6px;align-items:flex-end">${gadHistory.map(a=>mkBar(a,21)).join('')}</div>
+    </div>`:''}
+    ${phqHistory.length?`<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <p class="label">Mood — PHQ-9</p>
+        <button class="btn btn-ghost btn-sm" onclick="startMonthlyAssessment('phq9')" style="font-size:.7rem">Retake</button>
+      </div>
+      <div style="display:flex;gap:6px;align-items:flex-end">${phqHistory.map(a=>mkBar(a,27)).join('')}</div>
+    </div>`:''}
+    ${!gadHistory.length||!phqHistory.length?`<button class="btn btn-teal btn-full" onclick="startMonthlyAssessment('${!gadHistory.length?'gad7':'phq9'}')" style="margin-bottom:12px">Start monthly check-in →</button>`:''}
+  `:'';
+
   return`<div class="pattern-screen" style="display:flex;flex-direction:column">
     <div class="top-nav" style="max-width:540px;margin:0 auto;width:100%;padding:18px 22px 0">
       <button class="btn-icon" onclick="back()">←</button>
@@ -1442,8 +1600,9 @@ function rPatterns(){
       ${allDays.length<7?`<div class="card-sm" style="text-align:center;opacity:.6"><p class="body-text" style="font-size:.85rem;font-style:italic">Patterns unlock after 7 days of data. You have ${allDays.length} so far. Keep going.</p></div>`:`
         <div class="sec-label">Your states</div>
         <div class="card" style="margin-bottom:20px">${stateBarHTML}</div>
+        ${assessHTML}
         <div class="sec-label">What we notice</div>
-        ${insights?insights.map(ins=>`<div class="insight-card"><div class="insight-text">${ins}</div></div>`).join(''):`<div class="card-sm" style="opacity:.6;text-align:center"><p class="body-text" style="font-size:.85rem;font-style:italic">Keep using Woblii and patterns will emerge here.</p></div>`}
+        ${insights&&insights.length?insights.map(ins=>`<div class="insight-card"><div class="insight-text">${ins}</div></div>`).join(''):`<div class="card-sm" style="opacity:.6;text-align:center"><p class="body-text" style="font-size:.85rem;font-style:italic">Keep using Woblii and patterns will emerge here.</p></div>`}
         <div class="card-sm" style="margin-top:8px;border-style:dashed;opacity:.55"><p class="body-text" style="font-size:.8rem;font-style:italic;text-align:center">These are observations, not verdicts. You decide what to do with them.</p></div>`}
     </div></div>
   </div>`
@@ -1561,6 +1720,19 @@ function rSettings(){
     ${compCards}
     <button class="btn btn-primary" onclick="saveCompanionSettings()" style="width:100%;margin-bottom:28px">Save companion settings</button>
 
+    <div class="sec-label">Daily check-in options</div>
+    <div class="card" style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <p style="font-size:.88rem;color:var(--text);margin-bottom:2px">Sensory tracking</p>
+          <p class="muted" style="font-size:.75rem">Add sensory environment questions to your daily body check</p>
+        </div>
+        <div style="width:44px;height:24px;border-radius:12px;background:${userPrefs?.sensory_tracking?'var(--teal)':'var(--surface2)'};border:1px solid var(--border);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0" onclick="toggleSensoryTracking()">
+          <div style="position:absolute;top:2px;${userPrefs?.sensory_tracking?'right:2px':'left:2px'};width:18px;height:18px;border-radius:50%;background:white;transition:all .2s"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="sec-label">Crisis plan</div>
     <div class="card" style="margin-bottom:20px">
       <button class="btn btn-ghost" onclick="go('crisis-setup')" style="width:100%">${userPrefs?.crisis_plan?.action?'Edit crisis plan':'Set up crisis plan'} →</button>
@@ -1617,6 +1789,12 @@ async function saveCompanionSettings(){
   await dbSavePrefs({companion_names:names,companion_custom_msgs:msgs});
   toast('Companions updated.');
 }
+async function toggleSensoryTracking(){
+  const v=!userPrefs?.sensory_tracking;
+  await dbSavePrefs({sensory_tracking:v});
+  toast(v?'Sensory tracking on. Shows in your daily body check.':'Sensory tracking off.');
+  go('settings');
+}
 function selectRegion(r){
   userPrefs={...userPrefs,libre_region:r};
   document.querySelectorAll('#app .bopt').forEach(b=>{if(b.getAttribute('onclick')?.includes('selectRegion'))b.classList.toggle('on',b.getAttribute('onclick')?.includes(`'${r}'`))});
@@ -1650,7 +1828,8 @@ function rCloseDay(){
   const done=todayData.tasks.filter(t=>t.done).length,tot=todayData.tasks.length;
   const comp=STATES.find(s=>s.id===todayData.state)?.companion;
   const farewell=comp&&todayData.ortDone?compMini(comp,rnd(MSG[comp].ortDone)):'';
-  return`<div class="screen" style="display:flex"><div class="screen-inner">
+  const cur=todayData.activationClose||'';
+  return`<div class="screen" style="display:flex"><div class="scroll-area"><div class="screen-inner">
     <div style="display:flex;align-items:center;gap:11px;margin-bottom:28px">
       <button class="btn-icon" onclick="go('day')">←</button>
       <div class="heading">Close the <em>day</em></div>
@@ -1659,6 +1838,15 @@ function rCloseDay(){
     `<div class="card-sm" style="margin-bottom:16px;text-align:center;opacity:.65"><p class="body-text" style="font-size:.83rem">${done} of ${tot} tasks done.${tot===0?' You showed up. That is something.':''}</p></div>`}
     ${farewell}
     <div class="star-sep">✦ ✦ ✦</div>
+    <div class="card" style="margin-bottom:14px">
+      <p class="label" style="margin-bottom:5px">How are you feeling compared to this morning?</p>
+      <p class="muted" style="font-size:.75rem;margin-bottom:10px">Not about what you did. Just how you feel.</p>
+      <div class="activation-opts">
+        <div class="act-opt ${cur==='better'?'on':''}" onclick="selActivation('better')">😌 Better</div>
+        <div class="act-opt same ${cur==='same'?'on':''}" onclick="selActivation('same')">→ Same</div>
+        <div class="act-opt harder ${cur==='harder'?'on':''}" onclick="selActivation('harder')">↓ Harder</div>
+      </div>
+    </div>
     <div class="card" style="margin-bottom:14px">
       <p class="label" style="margin-bottom:5px">One thing that happened today</p>
       <p class="muted" style="font-size:.76rem;margin-bottom:4px">However small. Even just a moment.</p>
@@ -1671,7 +1859,7 @@ function rCloseDay(){
     <button class="btn btn-primary btn-full" onclick="saveClose()">Save and rest →</button>
     <div class="gap-sm"></div>
     <button class="btn btn-ghost btn-full" onclick="go('day')">Back to today</button>
-  </div></div>`
+  </div></div></div>`
 }
 function rNight(){
   const ev=evidenceItems.length?evidenceItems[Math.floor(Math.random()*evidenceItems.length)].text:null;
@@ -1738,13 +1926,23 @@ function saveMidday(){
 function closeMidday(){document.getElementById('midday-modal').innerHTML=''}
 
 // ACTIONS
-function startDay(){tmp={state:'',body:{},size:'small'};go('state-check')}
+function startDay(){tmp={state:'',body:{},size:'small',wot:'',dissociation:false,sensory:{},sleepHours:null};go('state-check')}
 function completeReturn(){go('state-check')}
 function selState(id){tmp.state=id;go('state-check')}
 function selBody(f,v){tmp.body[f]=v;go('body-check')}
 function goBody(){if(tmp.state)go('body-check')}
 function back(){todayData?.state?go('day'):go('welcome')}
-async function goDay(){todayData.state=tmp.state;todayData.body={...tmp.body};document.body.dataset.state=tmp.state;scheduleSave();go('day')}
+async function goDay(){
+  todayData.state=tmp.state;
+  todayData.body={...tmp.body};
+  todayData.wot=tmp.wot||'';
+  todayData.dissociation=tmp.dissociation||false;
+  todayData.sensory=tmp.sensory||{};
+  todayData.sleepHours=tmp.sleepHours||null;
+  document.body.dataset.state=tmp.state;
+  scheduleSave();
+  go('day');
+}
 function saveORT(v){todayData.oneRealThing=v;scheduleSave()}
 function toggleORT(){
   if(!todayData.oneRealThing?.trim()){toast('Add your one real thing first');return}
@@ -2130,6 +2328,273 @@ function skipScreening(){
   dbSavePrefs({screening_complete:true}).catch(()=>{});
   userPrefs={...userPrefs,screening_complete:true};
   nextOnboard();
+}
+
+// ================================================================
+// NEW FEATURE ACTIONS
+// ================================================================
+function selWot(v){
+  tmp.wot=v;
+  document.querySelectorAll('.wot-opt').forEach(el=>el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${v}'`)));
+  // If hyper, reset dissociation
+  if(v!=='hypo'&&v!=='hyper')tmp.dissociation=false;
+  go('state-check');
+}
+function selDissoc(v){
+  tmp.dissociation=v;
+  go('state-check');
+}
+function selSensory(f,v){
+  tmp.sensory={...tmp.sensory,[f]:v};
+  document.querySelectorAll(`[onclick^="selSensory('${f}'"]`).forEach(el=>{
+    el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${v}'`));
+  });
+}
+function selActivation(v){
+  todayData.activationClose=v;
+  scheduleSave();
+  document.querySelectorAll('.act-opt').forEach(el=>el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${v}'`)));
+}
+
+// ================================================================
+// MONTHLY ASSESSMENTS
+// ================================================================
+const MONTHLY={
+  gad7:{
+    id:'gad7',title:'Anxiety check',subtitle:'GAD-7',
+    intro:'Over the last two weeks, how often have you been bothered by the following?',
+    opts:['Not at all','Several days','More than half','Nearly every day'],
+    questions:[
+      'Feeling nervous, anxious, or on edge',
+      'Not being able to stop or control worrying',
+      'Worrying too much about different things',
+      'Trouble relaxing',
+      'Being so restless that it\'s hard to sit still',
+      'Becoming easily annoyed or irritable',
+      'Feeling afraid as if something awful might happen'
+    ],
+    score(a){return Object.values(a).reduce((s,v)=>s+(['Not at all','Several days','More than half','Nearly every day'].indexOf(v)),0)},
+    interpret(s){
+      if(s<=4)return{level:'minimal',label:'Minimal anxiety',color:'success'};
+      if(s<=9)return{level:'mild',label:'Mild anxiety',color:'teal'};
+      if(s<=14)return{level:'moderate',label:'Moderate anxiety',color:'accent'};
+      return{level:'severe',label:'Severe anxiety',color:'danger'};
+    }
+  },
+  phq9:{
+    id:'phq9',title:'Mood check',subtitle:'PHQ-9',
+    intro:'Over the last two weeks, how often have you been bothered by the following?',
+    opts:['Not at all','Several days','More than half','Nearly every day'],
+    questions:[
+      'Little interest or pleasure in doing things',
+      'Feeling down, depressed, or hopeless',
+      'Trouble falling or staying asleep, or sleeping too much',
+      'Feeling tired or having little energy',
+      'Poor appetite or overeating',
+      'Feeling bad about yourself — or that you are a failure',
+      'Trouble concentrating on things, such as reading or watching TV',
+      'Moving or speaking so slowly that other people could have noticed. Or being fidgety or restless more than usual',
+      'Thoughts that you would be better off dead, or of hurting yourself in some way'
+    ],
+    score(a){return Object.values(a).reduce((s,v)=>s+(['Not at all','Several days','More than half','Nearly every day'].indexOf(v)),0)},
+    interpret(s){
+      if(s<=4)return{level:'minimal',label:'Minimal symptoms',color:'success'};
+      if(s<=9)return{level:'mild',label:'Mild symptoms',color:'teal'};
+      if(s<=14)return{level:'moderate',label:'Moderate symptoms',color:'accent'};
+      if(s<=19)return{level:'moderately-severe',label:'Moderately severe',color:'voltage'};
+      return{level:'severe',label:'Severe symptoms',color:'danger'};
+    }
+  }
+};
+
+const CURRENT_MONTH=TODAY.slice(0,7); // YYYY-MM
+
+function checkMonthlyAssessment(){
+  if(!monthlyAssessments)return;
+  const gadDone=monthlyAssessments.some(a=>a.month===CURRENT_MONTH&&a.type==='gad7');
+  const phqDone=monthlyAssessments.some(a=>a.month===CURRENT_MONTH&&a.type==='phq9');
+  if(!gadDone||!phqDone){
+    // Show prompt on welcome screen — handled in rWelcome via monthlyDue flag
+    window._monthlyDue=true;
+  }
+}
+
+function rMonthlyPrompt(){
+  return`<div style="background:rgba(74,155,142,.08);border:1px solid rgba(74,155,142,.25);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:fadeIn .5s .9s both">
+    <div>
+      <p style="font-size:.82rem;color:var(--teal);font-weight:500">Monthly check-in due</p>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px">Two short questionnaires. About 3 minutes.</p>
+    </div>
+    <button class="btn btn-teal btn-sm" onclick="startMonthlyAssessment('gad7')">Begin →</button>
+  </div>`;
+}
+
+function startMonthlyAssessment(type){
+  currentAssessmentType=type;
+  currentAssessmentAnswers={};
+  const modal=document.getElementById('midday-modal');
+  modal.innerHTML=rMonthlySheet(type);
+}
+
+function rMonthlySheet(type){
+  const m=MONTHLY[type];if(!m)return'';
+  const allDone=m.questions.every((_,i)=>currentAssessmentAnswers[i]!==undefined);
+  return`<div class="assessment-modal" onclick="if(event.target===this)closeAssessment()">
+    <div class="assessment-sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div><div class="heading" style="font-size:1.1rem">${m.title}</div><p class="muted" style="font-size:.7rem">${m.subtitle} · ${m.questions.length} questions</p></div>
+        <button class="btn-icon" onclick="closeAssessment()">×</button>
+      </div>
+      <p class="muted" style="font-size:.78rem;font-style:italic;margin-bottom:16px">${m.intro}</p>
+      ${m.questions.map((q,i)=>`
+        <div class="assessment-q">
+          <div class="aqtext"><strong>${i+1}.</strong> ${q}</div>
+          <div class="assessment-opts">
+            ${m.opts.map(o=>`<div class="assessment-opt ${currentAssessmentAnswers[i]===o?'on':''}" onclick="answerAssessment(${i},'${o.replace(/'/g,"\\'")}','${type}')">${o}</div>`).join('')}
+          </div>
+        </div>`).join('')}
+      <div class="gap"></div>
+      <button class="btn btn-primary btn-full" id="assess-submit" onclick="submitAssessment('${type}')" ${!allDone?'disabled style="opacity:.4"':''}>See result →</button>
+      <div class="gap-sm"></div>
+      <button class="btn btn-ghost btn-full" onclick="closeAssessment()">Save and finish later</button>
+    </div>
+  </div>`;
+}
+
+function rMonthlyResult(type,score,interp,history){
+  const m=MONTHLY[type];
+  const nextType=type==='gad7'?'phq9':null;
+  const nextDone=nextType?monthlyAssessments.some(a=>a.month===CURRENT_MONTH&&a.type===nextType):true;
+  // Build score history bars
+  const histHTML=history.filter(a=>a.type===type).slice(0,6).reverse().map(a=>{
+    const mo=a.month.slice(5); // MM
+    const months=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const maxScore=type==='gad7'?21:27;
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">
+      <div style="font-size:.65rem;color:var(--text-muted)">${months[parseInt(mo)]}</div>
+      <div style="height:48px;width:100%;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:0;left:0;right:0;background:var(--teal);border-radius:4px;height:${Math.round((a.score/maxScore)*100)}%;transition:height .6s ease"></div>
+      </div>
+      <div style="font-size:.7rem;color:var(--text-muted)">${a.score}</div>
+    </div>`;
+  }).join('');
+  return`<div class="assessment-modal" onclick="if(event.target===this)closeAssessment()">
+    <div class="assessment-sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="heading" style="font-size:1.1rem">${m.title} — Result</div>
+        <button class="btn-icon" onclick="closeAssessment()">×</button>
+      </div>
+      <div class="result-card" style="margin-bottom:14px">
+        <div class="result-score">${score}</div>
+        <div class="result-label">${interp.label}</div>
+        <p class="result-insight" style="margin-bottom:0">${getAssessmentMessage(type,interp.level,score)}</p>
+        ${(type==='phq9'&&score>=10)||interp.level==='severe'?`<div style="background:rgba(196,122,90,.1);border:1px solid rgba(196,122,90,.25);border-radius:var(--radius-sm);padding:10px 13px;font-size:.8rem;color:var(--voltage);margin-top:12px;line-height:1.55">This score suggests it may be worth talking to your GP or a mental health professional. You can show them this result.</div>`:''}
+        ${type==='phq9'&&currentAssessmentAnswers[8]&&currentAssessmentAnswers[8]!=='Not at all'?`<div style="background:rgba(196,122,90,.15);border:1px solid rgba(196,122,90,.35);border-radius:var(--radius-sm);padding:12px 14px;font-size:.85rem;color:var(--danger);margin-top:12px;line-height:1.6"><strong>You mentioned thoughts of self-harm.</strong> Please reach out to someone today. Samaritans: 116 123 (free, 24/7). You are not alone in this.</div>`:''}
+      </div>
+      ${histHTML?`<div style="margin-bottom:16px"><p class="label" style="margin-bottom:10px">Over time</p><div style="display:flex;gap:6px;align-items:flex-end">${histHTML}</div></div>`:''}
+      ${nextType&&!nextDone?`<button class="btn btn-primary btn-full" onclick="startMonthlyAssessment('${nextType}')" style="margin-bottom:9px">Next: ${MONTHLY[nextType].title} →</button>`:''}
+      <button class="btn btn-ghost btn-full" onclick="closeAssessment()">${nextType&&!nextDone?'Skip for now':'Done'}</button>
+    </div>
+  </div>`;
+}
+
+function getAssessmentMessage(type,level,score){
+  if(type==='gad7'){
+    if(level==='minimal')return'Your anxiety levels are low this month. A steady baseline.';
+    if(level==='mild')return'Some anxiety present. Worth noticing what triggers it. This is within normal range.';
+    if(level==='moderate')return'Moderate anxiety. This is affecting daily life in noticeable ways. Worth tracking and possibly discussing with someone.';
+    return'Significant anxiety levels. Please consider talking to your GP. You do not have to manage this alone.';
+  }
+  if(type==='phq9'){
+    if(level==='minimal')return'Mood symptoms are low this month.';
+    if(level==='mild')return'Mild symptoms present. Keep tracking and be gentle with yourself.';
+    if(level==='moderate')return'Moderate symptoms. This is having a real impact. Worth discussing with your GP.';
+    if(level==='moderately-severe')return'Significant symptoms. Please speak to your GP soon. This level of difficulty deserves proper support.';
+    return'Severe symptoms. Please reach out to your GP as soon as possible.';
+  }
+  return'';
+}
+
+function answerAssessment(idx,val,type){
+  currentAssessmentAnswers[idx]=val;
+  const m=MONTHLY[type];
+  const allDone=m.questions.every((_,i)=>currentAssessmentAnswers[i]!==undefined);
+  // Update just this question's options
+  const opts=document.querySelectorAll(`.assessment-q:nth-child(${idx+3}) .assessment-opt`);
+  opts.forEach(el=>el.classList.toggle('on',el.textContent.trim()===val));
+  // Enable submit
+  const btn=document.getElementById('assess-submit');
+  if(btn){btn.disabled=!allDone;btn.style.opacity=allDone?'1':'.4';}
+}
+
+async function submitAssessment(type){
+  const m=MONTHLY[type];if(!m)return;
+  const score=m.score(currentAssessmentAnswers);
+  const interp=m.interpret(score);
+  await dbSaveMonthlyAssessment(CURRENT_MONTH,type,currentAssessmentAnswers,score);
+  // Update local cache
+  monthlyAssessments=monthlyAssessments.filter(a=>!(a.month===CURRENT_MONTH&&a.type===type));
+  monthlyAssessments.unshift({month:CURRENT_MONTH,type,answers:currentAssessmentAnswers,score});
+  // Check if monthly is now complete
+  const gadDone=monthlyAssessments.some(a=>a.month===CURRENT_MONTH&&a.type==='gad7');
+  const phqDone=monthlyAssessments.some(a=>a.month===CURRENT_MONTH&&a.type==='phq9');
+  if(gadDone&&phqDone)window._monthlyDue=false;
+  // Show result
+  const modal=document.getElementById('midday-modal');
+  modal.innerHTML=rMonthlyResult(type,score,interp,monthlyAssessments);
+}
+function closeAssessment(){document.getElementById('midday-modal').innerHTML=''}
+
+// Update patterns to include assessment scores and activation data
+function generateInsightsEnhanced(days,assessments){
+  const baseInsights=generateInsights(days)||[];
+  const n=userName();
+  const you=n||'You';
+  const extra=[];
+
+  // Behavioural activation insight
+  const closedDays=days.filter(d=>d.activation_close&&d.ort_done!==undefined);
+  if(closedDays.length>=7){
+    const betterOnORT=closedDays.filter(d=>d.ort_done&&d.activation_close==='better').length;
+    const totalORT=closedDays.filter(d=>d.ort_done).length;
+    const betterNoORT=closedDays.filter(d=>!d.ort_done&&d.activation_close==='better').length;
+    const totalNoORT=closedDays.filter(d=>!d.ort_done).length;
+    if(totalORT>=4&&totalNoORT>=3){
+      const ortRate=Math.round((betterOnORT/totalORT)*100);
+      const noOrtRate=Math.round((betterNoORT/totalNoORT)*100);
+      if(ortRate>noOrtRate+15)extra.push(`On days when ${you.toLowerCase()} completed your one real thing, ${you.toLowerCase()} felt better by evening <strong>${ortRate}% of the time</strong> — compared to ${noOrtRate}% on days you didn't. That connection is worth knowing.`);
+    }
+  }
+
+  // WOT patterns
+  const hyperDays=days.filter(d=>d.wot==='hyper').length;
+  const hypoDays=days.filter(d=>d.wot==='hypo').length;
+  const recent=days.slice(0,28);
+  if(hyperDays>=4)extra.push(`Racing thoughts or restlessness have been present on <strong>${hyperDays} days</strong> recently. Slow exhale breathing at the start of those days may help settle the system.`);
+  if(hypoDays>=4)extra.push(`Shutdown or numbness has been present on <strong>${hypoDays} days</strong> recently. Gentle physical activation — cold water, standing up slowly — can help on those mornings.`);
+
+  // Sleep debt
+  const sleepHoursData=recent.filter(d=>d.sleep_hours&&d.sleep_hours>0);
+  if(sleepHoursData.length>=5){
+    const avg=(sleepHoursData.reduce((s,d)=>s+d.sleep_hours,0)/sleepHoursData.length).toFixed(1);
+    if(avg<6.5)extra.push(`Average sleep when tracked has been <strong>${avg} hours</strong>. Sustained sleep below 7 hours affects executive function, mood regulation, and energy significantly.`);
+  }
+
+  // Sensory patterns
+  const sensoryHard=recent.filter(d=>d.sensory?.overall==='overwhelm').length;
+  if(sensoryHard>=3)extra.push(`Sensory overwhelm has appeared on <strong>${sensoryHard} days</strong> this month. Worth noting whether those days cluster around particular environments or times.`);
+
+  // Assessment trend
+  if(assessments&&assessments.length>=2){
+    const gadScores=assessments.filter(a=>a.type==='gad7').slice(0,3);
+    const phqScores=assessments.filter(a=>a.type==='phq9').slice(0,3);
+    if(gadScores.length>=2&&gadScores[0].score>gadScores[1].score+4)extra.push(`Your anxiety score has increased noticeably since last month. Worth paying attention to.`);
+    if(gadScores.length>=2&&gadScores[0].score<gadScores[1].score-4)extra.push(`Your anxiety score has decreased since last month. Something is helping. Worth noticing what.`);
+    if(phqScores.length>=2&&phqScores[0].score>phqScores[1].score+4)extra.push(`Your mood score has declined since last month. This is worth monitoring and possibly discussing with someone.`);
+    if(phqScores.length>=2&&phqScores[0].score<phqScores[1].score-4)extra.push(`Your mood score has improved since last month. Keep going.`);
+  }
+
+  return [...extra,...baseInsights];
 }
 
 // ================================================================
