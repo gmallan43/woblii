@@ -1512,8 +1512,17 @@ function rDay(){
       ${t.tasks.length>0?`<div class="enough-line"><div class="el"></div><div class="etxt">enough</div><div class="er"></div></div>`:''}
       ${t.tasks.slice(2).map(k=>taskHTML(k)).join('')}
       <div class="add-form" id="add-form">
-        <p class="label" style="margin-bottom:12px">What is the very first physical action?</p>
+        <p class="label" style="margin-bottom:6px">What is the very first physical action?</p>
         <input type="text" class="ati" id="ti" placeholder="The action, not the project..." maxlength="100">
+        <div style="margin-bottom:12px">
+          <button onclick="toggleTaskSuggestions()" style="background:none;border:none;font-size:.7rem;color:var(--text-muted);cursor:pointer;padding:0;font-family:var(--font-b);display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+            <span id="task-suggest-arrow">▾</span> Pick from a list
+          </button>
+          <div class="ort-suggestions" id="task-suggest-box" style="margin-top:8px">
+            <div class="ort-cat-chips" id="task-cat-chips"></div>
+            <div class="ort-pills" id="task-pills"></div>
+          </div>
+        </div>
         <p class="label" style="margin-bottom:7px">Energy cost</p>
         <div class="size-sel">${SIZES.map(s=>`<div class="sopt ${tmp.size===s.id?'on':''}" onclick="selSize('${s.id}')">${s.label} <span style="opacity:.45">(${s.desc})</span></div>`).join('')}</div>
         <p class="label" style="margin-bottom:5px">When you come back, start here: <span style="opacity:.45;text-transform:none;font-size:.68rem;letter-spacing:0">(optional)</span></p>
@@ -3194,6 +3203,46 @@ function ortCategoryOrder(state){
 
 let ortActiveCat='';
 
+function toggleTaskSuggestions(){
+  const box=document.getElementById('task-suggest-box');
+  if(!box)return;
+  const open=box.classList.toggle('open');
+  if(open){
+    const order=ortCategoryOrder(todayData.state);
+    if(!ortActiveCat)ortActiveCat=order[0];
+    renderTaskCats();
+    renderTaskPills();
+  }
+}
+function selectTaskCat(cat){
+  ortActiveCat=cat;
+  renderTaskCats();
+  renderTaskPills();
+}
+function renderTaskCats(){
+  const order=ortCategoryOrder(todayData.state);
+  const container=document.getElementById('task-cat-chips');
+  if(!container)return;
+  container.innerHTML=order.map(id=>{
+    const c=ORT_SUGGESTIONS[id];
+    return`<div class="ort-cat-chip ${ortActiveCat===id?'on':''}" onclick="selectTaskCat('${id}')">${c.label}</div>`;
+  }).join('');
+}
+function renderTaskPills(){
+  const container=document.getElementById('task-pills');
+  if(!container||!ortActiveCat)return;
+  const items=ORT_SUGGESTIONS[ortActiveCat]?.items||[];
+  container.innerHTML=items.map(s=>
+    `<div class="ort-pill" onclick="pickTaskSuggestion(${JSON.stringify(s)})">${s}</div>`
+  ).join('');
+}
+function pickTaskSuggestion(text){
+  const input=document.getElementById('ti');
+  if(input){input.value=text;}
+  const box=document.getElementById('task-suggest-box');
+  if(box)box.classList.remove('open');
+  ortActiveCat='';
+}
 function toggleOrtSuggestions(){
   const box=document.getElementById('ort-suggest-box');
   if(!box)return;
