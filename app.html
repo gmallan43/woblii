@@ -83,8 +83,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .drop{width:10px;height:13px;background:var(--teal-dim);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;border:1px solid rgba(74,155,142,.22);transition:all .3s}
 .drop.used{background:var(--teal);border-color:var(--teal)}.drop.over{background:var(--voltage);border-color:var(--voltage)}
 
-.ort-card{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--accent-dim);border-radius:var(--radius);padding:22px;margin-bottom:18px;position:relative;overflow:hidden;transition:all .4s}
-.ort-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);border-radius:3px 0 0 3px;transition:background .4s}
+.ort-card{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--accent-dim);border-radius:var(--radius);padding:22px;margin-bottom:18px;position:relative;transition:all .4s}
+.ort-card::before{content:'';position:absolute;top:0;left:0;width:3px;bottom:0;background:var(--accent);border-radius:3px 0 0 3px;transition:background .4s}
 .ort-card.done{border-color:var(--success);opacity:.72}.ort-card.done::before{background:var(--success)}
 .ort-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--font-d);font-size:1.25rem;font-weight:300;padding:7px 0;outline:none;margin-top:9px;transition:border-color .2s}
 .ort-input:focus{border-bottom-color:var(--accent)}.ort-input::placeholder{color:var(--text-muted);font-style:italic}
