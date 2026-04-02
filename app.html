@@ -1513,16 +1513,9 @@ function rDay(){
       ${t.tasks.slice(2).map(k=>taskHTML(k)).join('')}
       <div class="add-form" id="add-form">
         <p class="label" style="margin-bottom:6px">What is the very first physical action?</p>
-        <input type="text" class="ati" id="ti" placeholder="The action, not the project..." maxlength="100">
-        <div style="margin-bottom:12px">
-          <button onclick="toggleTaskSuggestions()" style="background:none;border:none;font-size:.7rem;color:var(--text-muted);cursor:pointer;padding:0;font-family:var(--font-b);display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
-            <span id="task-suggest-arrow">▾</span> Pick from a list
-          </button>
-          <div class="ort-suggestions" id="task-suggest-box" style="margin-top:8px">
-            <div class="ort-cat-chips" id="task-cat-chips"></div>
-            <div class="ort-pills" id="task-pills"></div>
-          </div>
-        </div>
+        <input type="text" class="ati" id="ti" placeholder="Or pick one below..." maxlength="100">
+        <div class="ort-cat-chips" id="task-cat-chips" style="margin-bottom:8px"></div>
+        <div class="ort-pills" id="task-pills" style="margin-bottom:14px"></div>
         <p class="label" style="margin-bottom:7px">Energy cost</p>
         <div class="size-sel">${SIZES.map(s=>`<div class="sopt ${tmp.size===s.id?'on':''}" onclick="selSize('${s.id}')">${s.label} <span style="opacity:.45">(${s.desc})</span></div>`).join('')}</div>
         <p class="label" style="margin-bottom:5px">When you come back, start here: <span style="opacity:.45;text-transform:none;font-size:.68rem;letter-spacing:0">(optional)</span></p>
@@ -1987,7 +1980,17 @@ function toggleORT(){
 function selSize(id){tmp.size=id;document.querySelectorAll('.sopt').forEach(el=>el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${id}'`)))}
 function toggleForm(){
   const f=document.getElementById('add-form'),b=document.getElementById('add-btn');
-  if(!f)return;const o=f.classList.toggle('open');b.style.display=o?'none':'';if(o)f.querySelector('input')?.focus();
+  if(!f)return;
+  const o=f.classList.toggle('open');
+  b.style.display=o?'none':'';
+  if(o){
+    f.querySelector('input')?.focus();
+    // Render task suggestions immediately
+    const order=ortCategoryOrder(todayData.state);
+    ortActiveCat=order[0];
+    renderTaskCats();
+    renderTaskPills();
+  }
 }
 function addTask(){
   const text=document.getElementById('ti')?.value?.trim();
