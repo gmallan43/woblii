@@ -1152,7 +1152,7 @@ function selectEmailTime(t){
   selectedEmailTime=t;
   document.querySelectorAll('.time-opt').forEach(el=>el.classList.toggle('on',el.getAttribute('onclick')?.includes(`'${t}'`)));
 }
-function nextOnboard(){onboardStep=Math.min(4,onboardStep+1);go('onboarding')}
+function nextOnboard(){onboardStep=Math.min(5,onboardStep+1);go('onboarding')}
 function prevOnboard(){onboardStep=Math.max(0,onboardStep-1);go('onboarding')}
 async function saveOnboardName(){
   const n=document.getElementById('name-input')?.value?.trim();
