@@ -1099,20 +1099,6 @@ function rOnboardName(dots){return`<div class="onboard-screen" style="display:fl
     <button class="btn btn-ghost btn-sm btn-full" onclick="prevOnboard()">← Back</button>
   </div>
 </div>`}
-  <div class="onboard-inner">
-    <div class="onboard-progress">${dots}</div>
-    <div class="heading" style="margin-bottom:8px">One last thing<em>.</em></div>
-    <p class="body-text" style="margin-bottom:8px">What would you like your companions to call you?</p>
-    <p class="muted" style="font-size:.78rem;margin-bottom:28px">Could be your name, a nickname, anything you like. Completely optional.</p>
-    <input type="text" class="text-input" id="name-input" placeholder="What shall we call you?" maxlength="30" style="font-size:1.1rem;text-align:center;font-family:var(--font-d)">
-    <div class="spacer"></div>
-    <button class="btn btn-primary btn-full" onclick="saveOnboardName()" style="margin-top:28px">That's me →</button>
-    <div class="gap-sm"></div>
-    <button class="btn btn-ghost btn-sm btn-full" onclick="nextOnboard()" style="opacity:.55">Skip this</button>
-    <div class="gap-sm"></div>
-    <button class="btn btn-ghost btn-sm btn-full" onclick="prevOnboard()">← Back</button>
-  </div>
-</div>`}
 
 function rOnboardNotifications(dots){
   const times=['06:00','07:00','08:00','09:00','10:00','11:00','12:00','No reminder'];
