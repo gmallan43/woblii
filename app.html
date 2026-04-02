@@ -742,16 +742,34 @@ async function checkDailyEmail(){
 // ================================================================
 async function fetchGlucose(){
   if(!userPrefs?.libre_email||!userPrefs?.libre_password)return null;
+  const HEADERS={'Content-Type':'application/json','version':'4.7.0','product':'llu.android','Accept-Encoding':'gzip','cache-control':'no-cache'};
+  const CREDS={email:userPrefs.libre_email,password:userPrefs.libre_password};
+  // Regional endpoints
+  const REGIONS={'EU':'api-eu','US':'api-us','AE':'api-ae','AP':'api-ap','AU':'api-au','CA':'api-ca','DE':'api-de','FR':'api-fr','JP':'api-jp'};
+  const region=userPrefs?.libre_region||'EU';
+  const subdomain=REGIONS[region]||'api-eu';
+  const BASE=`https://${subdomain}.libreview.io`;
   try{
-    const lr=await fetch('https://api.libreview.io/llu/auth/login',{method:'POST',headers:{'Content-Type':'application/json','version':'4.7.0','product':'llu.android'},body:JSON.stringify({email:userPrefs.libre_email,password:userPrefs.libre_password})});
-    const ld=await lr.json();
-    const token=ld?.data?.authTicket?.token;if(!token)return null;
-    const cr=await fetch('https://api.libreview.io/llu/connections',{headers:{'Authorization':`Bearer ${token}`,'version':'4.7.0','product':'llu.android'}});
+    // Step 1: initial login (may redirect to regional server)
+    const r1=await fetch('https://api.libreview.io/llu/auth/login',{method:'POST',headers:HEADERS,body:JSON.stringify(CREDS)});
+    const d1=await r1.json();
+    // If redirect response, use regional endpoint
+    let token=d1?.data?.authTicket?.token;
+    if(!token&&d1?.data?.redirect){
+      // Step 2: login to correct regional server
+      const r2=await fetch(`${BASE}/llu/auth/login`,{method:'POST',headers:HEADERS,body:JSON.stringify(CREDS)});
+      const d2=await r2.json();
+      token=d2?.data?.authTicket?.token;
+    }
+    if(!token)return null;
+    // Get connections from regional server
+    const cr=await fetch(`${BASE}/llu/connections`,{headers:{...HEADERS,'Authorization':`Bearer ${token}`}});
     const cd=await cr.json();
     const conn=cd?.data?.[0];if(!conn)return null;
     const r=conn.glucoseMeasurement;
-    return{value:r?.ValueInMgPerDl,valueMmol:(r?.ValueInMgPerDl/18).toFixed(1),trend:r?.TrendArrow,patientName:conn.firstName};
-  }catch(e){return null}
+    if(!r?.ValueInMgPerDl)return null;
+    return{value:r.ValueInMgPerDl,valueMmol:(r.ValueInMgPerDl/18).toFixed(1),trend:r.TrendArrow,patientName:conn.firstName||''};
+  }catch(e){console.log('Libre:',e);return null}
 }
 function glucoseInsight(g){
   if(!g?.valueMmol)return null;
@@ -1060,16 +1078,23 @@ function nextOnboard(){onboardStep=Math.min(4,onboardStep+1);go('onboarding')}
 function prevOnboard(){onboardStep=Math.max(0,onboardStep-1);go('onboarding')}
 async function saveOnboardName(){
   const n=document.getElementById('name-input')?.value?.trim();
-  if(n)await dbSavePrefs({display_name:n});
+  // Move immediately, save in background
+  if(n){
+    userPrefs={...userPrefs,display_name:n};
+    dbSavePrefs({display_name:n}).catch(()=>{});
+  }
   nextOnboard();
 }
 async function saveOnboardNotifications(){
-  const noReminder=selectedEmailTime==='No reminder';
-  await dbSavePrefs({daily_email_time:noReminder?'':selectedEmailTime,daily_email_enabled:!noReminder});
+  const noReminder=selectedEmailTime==='No reminder'||!selectedEmailTime;
+  const prefs={daily_email_time:noReminder?'08:00':selectedEmailTime,daily_email_enabled:!noReminder};
+  userPrefs={...userPrefs,...prefs};
+  dbSavePrefs(prefs).catch(()=>{});
   nextOnboard();
 }
 async function completeOnboarding(){
-  await dbSavePrefs({onboarding_complete:true});
+  userPrefs={...userPrefs,onboarding_complete:true};
+  dbSavePrefs({onboarding_complete:true}).catch(()=>{});
   go('welcome');
 }
 
