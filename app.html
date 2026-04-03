@@ -292,7 +292,18 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .msg-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-soft);font-family:var(--font-b);font-size:.82rem;padding:8px 12px;outline:none;resize:none;line-height:1.5;min-height:60px;font-style:italic;transition:border-color .2s}
 .msg-input:focus{border-color:var(--accent-dim)}.msg-input::placeholder{color:var(--text-muted);opacity:.6}
 
-/* ORT SUGGESTIONS */
+/* iOS SAFE AREAS */
+#app{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.bot-acts{padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+.top-nav{padding-top:calc(18px + env(safe-area-inset-top))}
+
+/* INSTALL PROMPT */
+.install-prompt{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:16px 20px calc(16px + env(safe-area-inset-bottom));z-index:800;animation:slideUp .4s cubic-bezier(.34,1.2,.64,1) both;max-width:540px;margin:0 auto}
+.install-prompt-inner{display:flex;align-items:center;gap:12px}
+.install-icon{width:44px;height:44px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:1.2rem;color:var(--bg);font-weight:300;letter-spacing:.1em;flex-shrink:0}
+.install-text{flex:1}
+.install-text strong{display:block;font-size:.88rem;color:var(--text);margin-bottom:2px}
+.install-text span{font-size:.75rem;color:var(--text-muted);line-height:1.4}
 .ort-suggestions{margin-top:12px;display:none}
 .ort-suggestions.open{display:block}
 .ort-cat-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
@@ -374,7 +385,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 const SUPA_URL='https://wstrdshnfgcjozvdmxwm.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzdHJkc2huZmdjam96dmRteHdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjk1MDMsImV4cCI6MjA5MDY0NTUwM30.PtscVW1srSt9uF6KiB8l1Kv_lmBHz885SdbiDTQGGSY';
 const RESEND_KEY='re_LYYUF9hz_DuRZB66VUEYrDug1sbhJ9VX7';
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{
+  auth:{
+    persistSession:true,
+    autoRefreshToken:true,
+    detectSessionInUrl:true,
+    storageKey:'woblii-auth'
+  }
+});
 
 const TODAY=new Date().toISOString().split('T')[0];
 const NOW=new Date();
@@ -985,7 +1003,8 @@ function go(s){
     night:rNight,done:rDone,
     settings:rSettings,patterns:rPatterns,
     crisis:rCrisis,'crisis-setup':rCrisisSetup,
-    'wobble-game':rWobbleGame
+    'wobble-game':rWobbleGame,
+    'reset-password':rResetPassword
   };
   if(!map[s])return;
   app.innerHTML=map[s]();
@@ -999,10 +1018,17 @@ function go(s){
 }
 function toast(m,d=2400){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
 function bind(){
-  document.querySelectorAll('input[type=text],input[type=email],input[type=password]').forEach(i=>{
+  // Auth inputs — Enter key
+  const authEmail=document.getElementById('auth-email');
+  const authPass=document.getElementById('auth-password');
+  const authConfirm=document.getElementById('auth-confirm');
+  if(authEmail)authEmail.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('auth-password')?.focus()});
+  if(authPass)authPass.addEventListener('keydown',e=>{if(e.key==='Enter'){if(authMode==='signup')document.getElementById('auth-confirm')?.focus();else document.getElementById('auth-btn')?.click();}});
+  if(authConfirm)authConfirm.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('auth-btn')?.click()});
+  // Other inputs
+  document.querySelectorAll('input[type=text]').forEach(i=>{
     i.addEventListener('keydown',e=>{
       if(e.key!=='Enter')return;
-      if(i.id==='email-input')sendMagicLink();
       if(i.id==='ri')completeReturn();
       if(i.id==='ti')addTask();
       if(i.id==='ei')addEvidence();
@@ -1015,19 +1041,65 @@ function bind(){
 // ================================================================
 // AUTH
 // ================================================================
-async function sendMagicLink(){
-  const el=document.getElementById('email-input');
-  const email=el?.value?.trim();
-  if(!email||!email.includes('@')){toast('Please enter a valid email address');return}
-  pendingEmail=email;el.disabled=true;
-  document.getElementById('send-btn').textContent='Sending...';
-  const{error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href}});
-  if(error){toast('Something went wrong. Please try again.');el.disabled=false;document.getElementById('send-btn').textContent='Send me a link →';return}
+// ================================================================
+// AUTH FUNCTIONS
+// ================================================================
+let authMode='signin'; // signin | signup | forgot
+
+async function signInWithPassword(){
+  const email=document.getElementById('auth-email')?.value?.trim();
+  const password=document.getElementById('auth-password')?.value;
+  if(!email||!email.includes('@')){toast('Please enter your email address');return}
+  if(!password||password.length<6){toast('Password must be at least 6 characters');return}
+  const btn=document.getElementById('auth-btn');
+  if(btn){btn.textContent='Signing in...';btn.disabled=true;}
+  const{error}=await sb.auth.signInWithPassword({email,password});
+  if(error){
+    if(btn){btn.textContent=authMode==='signup'?'Create account →':'Sign in →';btn.disabled=false;}
+    if(error.message?.includes('Invalid login')){toast('Incorrect email or password. Try again.');}
+    else if(error.message?.includes('already registered')){toast('An account with this email already exists. Sign in instead.');authMode='signin';go('signin');}
+    else{toast('Something went wrong. Please try again.');}
+    return;
+  }
+  // Success handled by onAuthStateChange
+}
+
+async function signUpWithPassword(){
+  const email=document.getElementById('auth-email')?.value?.trim();
+  const password=document.getElementById('auth-password')?.value;
+  const confirm=document.getElementById('auth-confirm')?.value;
+  if(!email||!email.includes('@')){toast('Please enter your email address');return}
+  if(!password||password.length<6){toast('Password must be at least 6 characters');return}
+  if(password!==confirm){toast('Passwords do not match');return}
+  const btn=document.getElementById('auth-btn');
+  if(btn){btn.textContent='Creating account...';btn.disabled=true;}
+  const{error}=await sb.auth.signUp({email,password});
+  if(error){
+    if(btn){btn.textContent='Create account →';btn.disabled=false;}
+    if(error.message?.includes('already registered')){
+      toast('Account already exists. Sign in instead.');
+      authMode='signin';go('signin');
+    }else{toast('Something went wrong. Please try again.');}
+    return;
+  }
+  // Auto signed in — handled by onAuthStateChange
+}
+
+async function sendPasswordReset(){
+  const email=document.getElementById('auth-email')?.value?.trim();
+  if(!email||!email.includes('@')){toast('Please enter your email address');return}
+  pendingEmail=email;
+  const btn=document.getElementById('auth-btn');
+  if(btn){btn.textContent='Sending...';btn.disabled=true;}
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+  if(error){toast('Something went wrong. Please try again.');if(btn){btn.textContent='Send reset link →';btn.disabled=false;}return}
   go('email-sent');
 }
+
 async function signOut(){
   await sb.auth.signOut();
   currentUser=null;todayData=null;evidenceItems=[];userPrefs=null;glucoseData=null;allDays=[];
+  monthlyAssessments=[];authMode='signin';
   go('signin');
 }
 
@@ -1035,33 +1107,68 @@ async function signOut(){
 // AUTH SCREENS
 // ================================================================
 function rLoading(){return`<div class="auth-screen" style="display:flex"><div class="auth-inner"><div class="logo">Woblii</div><div class="breathe-circle" style="border-color:var(--accent);background:radial-gradient(circle,var(--accent-dim),transparent)">···</div></div></div>`}
-function rSignin(){return`<div class="auth-screen" style="display:flex">
+
+function rSignin(){
+  const isSignup=authMode==='signup';
+  const isForgot=authMode==='forgot';
+  return`<div class="auth-screen" style="display:flex">
   <div class="auth-inner">
     <div class="logo">Woblii</div>
-    <div class="display" style="margin-bottom:14px;font-size:2.2rem">Begin.</div>
-    <p class="body-text" style="margin-bottom:36px;font-size:.9rem">Your companion for every kind of day.<br>Enter your email and we'll send you a link.</p>
-    <input type="email" class="text-input" id="email-input" placeholder="your@email.com" style="text-align:center" autocomplete="email">
+    <div class="display" style="margin-bottom:20px;font-size:2rem">${isSignup?'Create account.':isForgot?'Reset password.':'Welcome back.'}</div>
+
+    <input type="email" class="text-input" id="auth-email" placeholder="your@email.com" autocomplete="email" style="margin-bottom:10px">
+
+    ${!isForgot?`<div style="position:relative;margin-bottom:${isSignup?'10px':'6px'}">
+      <input type="password" class="text-input" id="auth-password" placeholder="${isSignup?'Choose a password (6+ characters)':'Password'}" autocomplete="${isSignup?'new-password':'current-password'}" style="margin:0;padding-right:44px">
+      <button onclick="togglePasswordVisibility('auth-password',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.8rem;padding:4px">👁</button>
+    </div>`:''}
+
+    ${isSignup?`<div style="position:relative;margin-bottom:6px">
+      <input type="password" class="text-input" id="auth-confirm" placeholder="Confirm password" autocomplete="new-password" style="margin:0;padding-right:44px">
+      <button onclick="togglePasswordVisibility('auth-confirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.8rem;padding:4px">👁</button>
+    </div>`:''}
+
     <div class="gap"></div>
-    <button class="btn btn-primary btn-full" id="send-btn" onclick="sendMagicLink()">Send me a link →</button>
-    <div class="auth-divider">no password required</div>
-    <p class="muted" style="font-size:.75rem;line-height:1.6">Works on any device. Your data stays private.</p>
+    <button class="btn btn-primary btn-full" id="auth-btn" onclick="${isSignup?'signUpWithPassword()':isForgot?'sendPasswordReset()':'signInWithPassword()'}" style="margin-bottom:14px">
+      ${isSignup?'Create account →':isForgot?'Send reset link →':'Sign in →'}
+    </button>
+
+    ${!isForgot?`<button onclick="authMode='${isSignup?'signin':'signup'}';go('signin')" class="btn btn-ghost btn-full" style="margin-bottom:10px">
+      ${isSignup?'Already have an account? Sign in':'New to Woblii? Create account'}
+    </button>`:''}
+
+    ${!isSignup?`<button onclick="authMode='${isForgot?'signin':'forgot'}';go('signin')" style="background:none;border:none;color:var(--text-muted);font-size:.78rem;cursor:pointer;width:100%;padding:6px;font-family:var(--font-b)">
+      ${isForgot?'← Back to sign in':'Forgot password?'}
+    </button>`:''}
+
+    <div class="auth-divider">secure · private · no tracking</div>
+    <p class="muted" style="font-size:.72rem;line-height:1.6;text-align:center">Your data is encrypted and only visible to you.</p>
   </div>
 </div>`}
+
+function togglePasswordVisibility(inputId,btn){
+  const input=document.getElementById(inputId);
+  if(!input)return;
+  const show=input.type==='password';
+  input.type=show?'text':'password';
+  btn.textContent=show?'🙈':'👁';
+}
+
 function rEmailSent(){return`<div class="auth-screen" style="display:flex">
   <div class="auth-inner">
     <div class="logo">Woblii</div>
     <div class="display" style="margin-bottom:18px;font-size:2rem">Check your email.</div>
     <div class="card" style="text-align:center">
-      <p class="muted" style="font-size:.78rem;margin-bottom:6px">We've sent a link to</p>
+      <p class="muted" style="font-size:.78rem;margin-bottom:6px">We've sent a password reset link to</p>
       <p style="font-family:var(--font-d);font-size:1.1rem;color:var(--accent);margin:8px 0">${pendingEmail}</p>
-      <p class="muted" style="font-size:.75rem;margin-top:6px">Click it to open Woblii.</p>
+      <p class="muted" style="font-size:.75rem;margin-top:6px">Click it to reset your password.</p>
     </div>
     <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:var(--radius-sm);padding:14px 16px;margin:16px 0;display:flex;align-items:flex-start;gap:10px">
       <span style="font-size:1.1rem;flex-shrink:0">📬</span>
-      <p style="font-size:.82rem;color:var(--accent);line-height:1.55"><strong>Not seeing it?</strong> Check your junk or spam folder. Magic link emails sometimes land there the first time.</p>
+      <p style="font-size:.82rem;color:var(--accent);line-height:1.55"><strong>Not seeing it?</strong> Check your junk or spam folder.</p>
     </div>
-    <p class="body-text" style="font-size:.82rem;opacity:.55;margin-bottom:20px">You can close this tab once you've clicked the link.</p>
-    <button class="btn btn-ghost btn-sm" onclick="go('signin')">Try a different email</button>
+    <div class="gap-lg"></div>
+    <button class="btn btn-ghost btn-sm btn-full" onclick="authMode='signin';go('signin')">← Back to sign in</button>
   </div>
 </div>`}
 
@@ -3294,22 +3401,89 @@ function pickOrtSuggestion(text){
   toast('Added. Make it yours if you want.');
 }
 
+function rResetPassword(){
+  return`<div class="auth-screen" style="display:flex">
+  <div class="auth-inner">
+    <div class="logo">Woblii</div>
+    <div class="display" style="margin-bottom:20px;font-size:2rem">New password.</div>
+    <p class="body-text" style="margin-bottom:20px;font-size:.88rem">Choose a new password for your account.</p>
+    <div style="position:relative;margin-bottom:10px">
+      <input type="password" class="text-input" id="new-password" placeholder="New password (6+ characters)" autocomplete="new-password" style="margin:0;padding-right:44px">
+      <button onclick="togglePasswordVisibility('new-password',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.8rem;padding:4px">👁</button>
+    </div>
+    <div style="position:relative;margin-bottom:6px">
+      <input type="password" class="text-input" id="new-password-confirm" placeholder="Confirm new password" autocomplete="new-password" style="margin:0;padding-right:44px">
+      <button onclick="togglePasswordVisibility('new-password-confirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.8rem;padding:4px">👁</button>
+    </div>
+    <div class="gap"></div>
+    <button class="btn btn-primary btn-full" id="reset-btn" onclick="saveNewPassword()">Save new password →</button>
+  </div>
+</div>`
+}
+async function saveNewPassword(){
+  const p=document.getElementById('new-password')?.value;
+  const c=document.getElementById('new-password-confirm')?.value;
+  if(!p||p.length<6){toast('Password must be at least 6 characters');return}
+  if(p!==c){toast('Passwords do not match');return}
+  const btn=document.getElementById('reset-btn');
+  if(btn){btn.textContent='Saving...';btn.disabled=true;}
+  const{error}=await sb.auth.updateUser({password:p});
+  if(error){toast('Something went wrong. Please try again.');if(btn){btn.textContent='Save new password →';btn.disabled=false;}return}
+  toast('Password updated. You are signed in.');
+  await loadUserData();
+}
+// ================================================================
+function showInstallPrompt(){
+  // Only on iOS Safari, only if not already installed, only once
+  const isIOS=/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  const isStandalone=window.navigator.standalone===true;
+  const dismissed=localStorage.getItem('woblii-install-dismissed');
+  if(!isIOS||isStandalone||dismissed)return;
+
+  const prompt=document.createElement('div');
+  prompt.className='install-prompt';
+  prompt.innerHTML=`
+    <div class="install-prompt-inner">
+      <div class="install-icon">W</div>
+      <div class="install-text">
+        <strong>Add Woblii to your home screen</strong>
+        <span>Tap <strong>Share</strong> then <strong>Add to Home Screen</strong> for the full app experience.</span>
+      </div>
+      <button onclick="dismissInstall()" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;padding:4px;flex-shrink:0">×</button>
+    </div>`;
+  document.body.appendChild(prompt);
+  // Auto dismiss after 12 seconds
+  setTimeout(dismissInstall, 12000);
+}
+function dismissInstall(){
+  localStorage.setItem('woblii-install-dismissed','1');
+  document.querySelector('.install-prompt')?.remove();
+}
+
 // ================================================================
 // INIT
 document.addEventListener('DOMContentLoaded',()=>{
   go('loading');
-  // Safety net: if stuck on loading screen for 10s, go to signin
   const loadingGuard=setTimeout(()=>{
     if(document.querySelector('.breathe-circle')){go('signin')}
   },10000);
   sb.auth.onAuthStateChange(async(event,session)=>{
     clearTimeout(loadingGuard);
+    // Handle password reset — route to set new password
+    if(event==='PASSWORD_RECOVERY'){
+      go('reset-password');
+      return;
+    }
     if(session?.user){
       currentUser=session.user;
       if(window.location.hash&&window.location.hash.includes('access_token')){
         window.history.replaceState({},document.title,window.location.pathname+window.location.search);
       }
-      try{await loadUserData()}catch(e){
+      try{
+        await loadUserData();
+        // Show iOS install prompt after first load
+        setTimeout(showInstallPrompt, 3000);
+      }catch(e){
         console.error('loadUserData error:',e);
         todayData=freshToday();go('welcome');
       }
