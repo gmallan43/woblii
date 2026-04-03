@@ -3347,11 +3347,22 @@ function renderTaskPills(){
   ).join('');
 }
 function pickTaskSuggestion(text){
+  // Fill the input
   const input=document.getElementById('ti');
   if(input){input.value=text;}
-  const box=document.getElementById('task-suggest-box');
-  if(box)box.classList.remove('open');
+  // Add the task immediately
+  const st=STATES.find(s=>s.id===todayData.state)||STATES[2];
+  const used=todayData.tasks.filter(k=>!k.done).reduce((s,k)=>s+(SIZES.find(z=>z.id===k.size)?.drops||2),0);
+  const adding=SIZES.find(s=>s.id===tmp.size)?.drops||2;
+  if(used+adding>st.jar){
+    const comp=st.companion;
+    if(comp)updateBubble(MSG[comp]?.overJar||'Jar is full.');
+    toast('Jar is at capacity — size it down?',2800);
+  }
+  todayData.tasks.push({id:Date.now().toString(),text,size:tmp.size,done:false,bc:''});
+  scheduleSave();
   ortActiveCat='';
+  go('day');
 }
 function toggleOrtSuggestions(){
   const box=document.getElementById('ort-suggest-box');
