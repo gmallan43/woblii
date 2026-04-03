@@ -200,7 +200,31 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .crisis-plan-label{font-size:.6rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:rgba(196,122,90,.5);margin-bottom:5px}
 .crisis-plan-text{font-size:.92rem;color:rgba(240,232,224,.8);line-height:1.5;font-family:var(--font-d);font-style:italic}
 
-/* COMPANION CARDS */
+/* COMPANION TEXT ANIMATIONS */
+@keyframes typeChar{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pipSlam{0%{transform:scale(1.15);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes pebbleFade{from{opacity:0}to{opacity:1}}
+@keyframes crunchyChar{0%{transform:translateY(-4px);opacity:0}60%{transform:translateY(2px)}100%{transform:translateY(0);opacity:1}}
+.comp-text-grumble span{display:inline;opacity:0;animation:typeChar .08s ease both}
+.comp-text-pip{animation:pipSlam .18s cubic-bezier(.34,1.8,.64,1) both}
+.comp-text-pebble{animation:pebbleFade 1.2s ease both}
+.comp-text-colin{animation:pebbleFade .3s ease both;letter-spacing:.01em}
+.comp-text-crunchy span{display:inline;opacity:0;animation:crunchyChar .06s ease both}
+.comp-text-crunchy em{font-style:normal;font-size:1.05em;font-weight:700}
+
+/* OPENING RITUAL */
+@keyframes ritualFadeIn{0%{opacity:0}40%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes ritualWord{0%{opacity:0;transform:translateY(8px)}20%{opacity:1;transform:translateY(0)}80%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-8px)}}
+.ritual-screen{position:fixed;inset:0;background:var(--bg);z-index:9998;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;pointer-events:none}
+.ritual-line{font-family:var(--font-d);font-weight:300;font-size:clamp(1.3rem,4vw,1.8rem);line-height:1.4;color:var(--text-soft);animation:ritualWord 3s ease both}
+
+/* CLOSING RITUAL */
+.closing-screen{position:fixed;inset:0;background:#0c0a08;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;animation:pebbleFade .8s ease both}
+.closing-line{font-family:var(--font-d);font-weight:300;font-size:clamp(1.1rem,3.5vw,1.5rem);line-height:1.5;color:rgba(240,235,224,.6);font-style:italic;animation:ritualWord 4s ease .5s both}
+
+/* LANGUAGE SHIFT */
+[data-lang=soft] .task-word-task{display:none}
+[data-lang=soft] .task-word-intention{display:inline}
 @keyframes bubblePop{0%{transform:scale(.65) translateY(9px);opacity:0}62%{transform:scale(1.05) translateY(-2px);opacity:1}100%{transform:scale(1);opacity:1}}
 .companion-card{display:flex;align-items:flex-end;gap:13px;border-radius:var(--radius);padding:15px 17px;margin-bottom:18px}
 .companion-figure{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -704,11 +728,11 @@ function svgPip(w){return`<svg viewBox="0 0 90 110" width="${w}" height="${Math.
 // COMPANION CONFIG
 // ================================================================
 const COMP_CFG={
-  grumble:{cls:'grumble-card',wrap:'grumble-svg-wrap',defaultName:'Grumble',svg:svgGrumble,sz:68,miniSz:42,bg:'rgba(130,120,180,.06)',bd:'rgba(140,130,190,.18)',cl:'#b8b0d8',state:'Flat'},
-  pebble: {cls:'pebble-card', wrap:'pebble-svg-wrap', defaultName:'Pebble', svg:svgPebble, sz:72,miniSz:44,bg:'rgba(184,144,80,.06)',bd:'rgba(184,148,90,.2)',cl:'#d4b880',state:'Fragile'},
-  colin:  {cls:'colin-card',  wrap:'colin-svg-wrap',  defaultName:'Colin',  svg:svgColin,  sz:52,miniSz:34,bg:'rgba(74,160,80,.06)', bd:'rgba(90,180,90,.18)', cl:'#a0cc90',state:'Steady'},
-  crunchy:{cls:'crunchy-card',wrap:'crunchy-svg-wrap',defaultName:'Crunchy',svg:svgCrunchy,sz:68,miniSz:40,bg:'rgba(245,197,24,.06)',bd:'rgba(245,197,24,.18)',cl:'#e8c840',state:'Energised'},
-  pip:    {cls:'pip-card',    wrap:'pip-svg-wrap',    defaultName:'Pip',    svg:svgPip,    sz:62,miniSz:38,bg:'rgba(255,100,30,.06)',bd:'rgba(255,120,40,.2)', cl:'#ffb060',state:'Lit Up'}
+  grumble:{cls:'grumble-card',wrap:'grumble-svg-wrap',defaultName:'Grumble',svg:svgGrumble,sz:68,miniSz:42,bg:'rgba(130,120,180,.06)',bd:'rgba(140,130,190,.18)',cl:'#b8b0d8',color:'#9080c8',state:'Flat'},
+  pebble: {cls:'pebble-card', wrap:'pebble-svg-wrap', defaultName:'Pebble', svg:svgPebble, sz:72,miniSz:44,bg:'rgba(184,144,80,.06)',bd:'rgba(184,148,90,.2)',cl:'#d4b880',color:'#c8a870',state:'Fragile'},
+  colin:  {cls:'colin-card',  wrap:'colin-svg-wrap',  defaultName:'Colin',  svg:svgColin,  sz:52,miniSz:34,bg:'rgba(74,160,80,.06)', bd:'rgba(90,180,90,.18)', cl:'#a0cc90',color:'#5cc05c',state:'Steady'},
+  crunchy:{cls:'crunchy-card',wrap:'crunchy-svg-wrap',defaultName:'Crunchy',svg:svgCrunchy,sz:68,miniSz:40,bg:'rgba(245,197,24,.06)',bd:'rgba(245,197,24,.18)',cl:'#e8c840',color:'#F6C918',state:'Energised'},
+  pip:    {cls:'pip-card',    wrap:'pip-svg-wrap',    defaultName:'Pip',    svg:svgPip,    sz:62,miniSz:38,bg:'rgba(255,100,30,.06)',bd:'rgba(255,120,40,.2)', cl:'#ffb060',color:'#ff7020',state:'Lit Up'}
 };
 
 function compName(type){return userPrefs?.companion_names?.[type]||COMP_CFG[type]?.defaultName||type}
@@ -1550,7 +1574,7 @@ function rDay(){
   if(t.body?.meds==='no'&&MSG[comp]?.medMissed)compMsg=[MSG[comp].medMissed];
   else if(gi?.level==='low'&&MSG[comp]?.glucoseLow)compMsg=[MSG[comp].glucoseLow];
   else if(gi?.level==='high'&&MSG[comp]?.glucoseHigh)compMsg=[MSG[comp].glucoseHigh];
-  const card=comp?compCard(comp,compMsg):'';
+  const card=comp?compCardAnimated(comp,compMsg):'';
   let glucoseBanner='';
   if(gi)glucoseBanner=`<div class="glucose-banner ${gi.level}"><div class="glucose-value">${glucoseData.valueMmol}</div><div>${gi.msg}</div></div>`;
   const seasonal=getSeasonalNote();
@@ -1587,13 +1611,13 @@ function rDay(){
       ${glucoseBanner}
       ${(t.body?.sleep==='poor'||t.body?.eaten==='no'||t.body?.meds==='no')?`<div class="card-sm" style="border-color:var(--teal-dim);margin-bottom:14px"><p class="body-text" style="font-size:.78rem">${t.body.sleep==='poor'?'⚠ Low sleep. ':''}${t.body.eaten==='no'?'⚠ Not eaten yet. ':''}${t.body.meds==='no'?'⚠ Medication missed yesterday.':''}</p></div>`:''}
       ${card}
-      <div class="sec-label">The one real thing</div>
+      <div class="sec-label">${langWord('The one real thing','Your one intention',t.state)}</div>
       <div class="ort-card ${t.ortDone?'done':''}">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:11px">
-          <p class="body-text" style="font-size:.76rem">If everything else falls away, this counts as a full day.</p>
-          ${t.ortDone?`<span style="color:var(--success);font-size:.83rem;flex-shrink:0">✓ Done</span>`:`<button class="btn btn-sm btn-teal" onclick="toggleORT()" style="flex-shrink:0">Done ✓</button>`}
+          <p class="body-text" style="font-size:.76rem">${langWord('If everything else falls away, this counts as a full day.','This is the whole day. Everything else is extra.',t.state)}</p>
+          ${t.ortDone?`<span style="color:var(--success);font-size:.83rem;flex-shrink:0">✓ ${langWord('Done','Offered',t.state)}</span>`:`<button class="btn btn-sm btn-teal" onclick="toggleORT()" style="flex-shrink:0">${langWord('Done ✓','Offered ✓',t.state)}</button>`}
         </div>
-        <input type="text" class="ort-input" id="ort-input" placeholder="What is the one thing that matters today?" value="${t.oneRealThing||''}" onchange="saveORT(this.value)" maxlength="100" ${t.ortDone?'readonly':''}>
+        <input type="text" class="ort-input" id="ort-input" placeholder="${langWord('What is the one thing that matters today?','What is one small intention for today?',t.state)}" value="${t.oneRealThing||''}" onchange="saveORT(this.value)" maxlength="100" ${t.ortDone?'readonly':''}>
         ${!t.ortDone?`
         <div style="margin-top:10px">
           <button onclick="toggleOrtSuggestions()" style="background:none;border:none;font-size:.72rem;color:var(--text-muted);cursor:pointer;padding:0;font-family:var(--font-b);display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
@@ -1609,30 +1633,30 @@ function rDay(){
       <div class="card" style="margin-bottom:18px">
         <div class="jar-header">
           <span class="body-text" style="font-size:.8rem;${over?'color:var(--danger)':''}">${used} of ${jarSize} drops used${over?' — over capacity':''}</span>
-          <span class="muted" style="font-size:.73rem">${t.tasks.filter(k=>k.done).length} complete</span>
+          <span class="muted" style="font-size:.73rem">${t.tasks.filter(k=>k.done).length} ${langWord('complete','offered',t.state)}</span>
         </div>
         <div class="jar-drops">${drops}</div>
       </div>
-      <div class="sec-label">Tasks</div>
-      ${t.tasks.length===0?`<div class="card-sm" style="text-align:center;border-style:dashed;opacity:.55;margin-bottom:11px"><p class="body-text" style="font-size:.83rem;font-style:italic">Add your first task. Size it honestly.</p></div>`:''}
-      ${t.tasks.slice(0,2).map(k=>taskHTML(k)).join('')}
+      <div class="sec-label">${langWord('Tasks','Intentions',t.state)}</div>
+      ${t.tasks.length===0?`<div class="card-sm" style="text-align:center;border-style:dashed;opacity:.55;margin-bottom:11px"><p class="body-text" style="font-size:.83rem;font-style:italic">${langWord('Add your first task. Size it honestly.','What is one small thing you could offer today?',t.state)}</p></div>`:''}
+      ${t.tasks.slice(0,2).map(k=>taskHTML(k,t.state)).join('')}
       ${t.tasks.length>0?`<div class="enough-line"><div class="el"></div><div class="etxt">enough</div><div class="er"></div></div>`:''}
-      ${t.tasks.slice(2).map(k=>taskHTML(k)).join('')}
+      ${t.tasks.slice(2).map(k=>taskHTML(k,t.state)).join('')}
       <div class="add-form" id="add-form">
-        <p class="label" style="margin-bottom:6px">What is the very first physical action?</p>
+        <p class="label" style="margin-bottom:6px">${langWord('What is the very first physical action?','What is the smallest possible thing?',t.state)}</p>
         <input type="text" class="ati" id="ti" placeholder="Or pick one below..." maxlength="100">
         <div class="ort-cat-chips" id="task-cat-chips" style="margin-bottom:8px"></div>
         <div class="ort-pills" id="task-pills" style="margin-bottom:14px"></div>
-        <p class="label" style="margin-bottom:7px">Energy cost</p>
+        <p class="label" style="margin-bottom:7px">${langWord('Energy cost','Weight',t.state)}</p>
         <div class="size-sel">${SIZES.map(s=>`<div class="sopt ${tmp.size===s.id?'on':''}" onclick="selSize('${s.id}')">${s.label} <span style="opacity:.45">(${s.desc})</span></div>`).join('')}</div>
         <p class="label" style="margin-bottom:5px">When you come back, start here: <span style="opacity:.45;text-transform:none;font-size:.68rem;letter-spacing:0">(optional)</span></p>
         <input type="text" class="bci" id="bci" placeholder="The exact first thing to do when you return to this...">
         <div style="display:flex;gap:7px">
-          <button class="btn btn-primary btn-sm" onclick="addTask()">Add task</button>
+          <button class="btn btn-primary btn-sm" onclick="addTask()">${langWord('Add task','Add intention',t.state)}</button>
           <button class="btn btn-ghost btn-sm" onclick="toggleForm()">Cancel</button>
         </div>
       </div>
-      <button class="btn btn-ghost" onclick="toggleForm()" id="add-btn" style="width:100%;margin-bottom:18px">+ Add task</button>
+      <button class="btn btn-ghost" onclick="toggleForm()" id="add-btn" style="width:100%;margin-bottom:18px">+ ${langWord('Add task','Add intention',t.state)}</button>
       ${showV?`<div class="sec-label" style="color:var(--voltage)">Voltage box</div>
       <div class="vbox">
         <div class="vrule">Everything here rests for 48 hours before it becomes a commitment. Your energy is real. This protects it from doing damage.</div>
@@ -1658,13 +1682,14 @@ function rDay(){
   </div>`
 }
 
-function taskHTML(tk){
+function taskHTML(tk,state){
   const sz=SIZES.find(s=>s.id===tk.size)||SIZES[1];
+  const doneWord=langWord('✓','✓',state);
   return`<div class="task-item ${tk.done?'done':''}" id="ti-${tk.id}">
-    <div class="tchk" onclick="toggleTask('${tk.id}')" id="tc-${tk.id}">${tk.done?'✓':''}</div>
+    <div class="tchk" onclick="toggleTask('${tk.id}')" id="tc-${tk.id}">${tk.done?doneWord:''}</div>
     <div class="tcontent">
       <div class="ttext">${tk.text}</div>
-      <div class="tmeta"><span class="sbadge ${tk.size}">${sz.label}</span></div>
+      <div class="tmeta"><span class="sbadge ${tk.size}">${langWord(sz.label,sz.label,state)}</span></div>
       ${tk.bc?`<div class="tbc" style="margin-top:5px"><span>↩</span><span>${tk.bc}</span></div>`:''}
     </div>
     <button class="tdel" onclick="delTask('${tk.id}')" title="Remove">×</button>
@@ -1742,7 +1767,7 @@ function rPatterns(){
 function rCrisis(){
   const plan=userPrefs?.crisis_plan||{};
   const hasPlan=plan.action||plan.person||plan.anchor||plan.reminder;
-  const ev=evidenceItems.length>0?evidenceItems[Math.floor(Math.random()*Math.min(evidenceItems.length,5))]:null;
+  const ev=evidenceItems.length>0?getSmartEvidence():null;
   const n=userName();
   return`<div class="crisis-screen" style="display:flex">
     <div class="crisis-inner">
@@ -1992,7 +2017,7 @@ function rCloseDay(){
   </div></div></div>`
 }
 function rNight(){
-  const ev=evidenceItems.length?evidenceItems[Math.floor(Math.random()*evidenceItems.length)].text:null;
+  const ev=evidenceItems.length?getSmartEvidence()?.text:null;
   const isLow=['flat','fragile'].includes(todayData?.state);
   const comp=isLow?(todayData?.state==='fragile'?'pebble':'grumble'):null;
   const nightComp=comp?compMini(comp,comp==='pebble'?"Still and quiet. <strong>The night will pass.</strong>":"Still here. <strong>That's something.</strong> The night will pass."):'';
@@ -2056,7 +2081,10 @@ function saveMidday(){
 function closeMidday(){document.getElementById('midday-modal').innerHTML=''}
 
 // ACTIONS
-function startDay(){tmp={state:'',body:{},size:'small',wot:'',dissociation:false,sensory:{},sleepHours:null};go('state-check')}
+function startDay(){
+  tmp={state:'',body:{},size:'small',wot:'',dissociation:false,sensory:{},sleepHours:null};
+  showOpeningRitual(()=>go('state-check'));
+}
 function completeReturn(){go('state-check')}
 function selState(id){tmp.state=id;go('state-check')}
 function selBody(f,v){tmp.body[f]=v;go('body-check')}
@@ -2142,7 +2170,9 @@ async function addEvidence(){
 async function deleteEvidence(id){await dbDeleteEvidence(id);evidenceItems=evidenceItems.filter(e=>e.id!==id);go('evidence')}
 function saveClose(){
   todayData.close={happening:document.getElementById('cl-h')?.value?.trim(),tomorrow:document.getElementById('cl-t')?.value?.trim(),closedAt:Date.now()};
-  scheduleSave();go('done');
+  scheduleSave();
+  const comp=STATES.find(s=>s.id===todayData.state)?.companion||'colin';
+  showClosingRitual(comp,()=>go('done'));
 }
 
 // ================================================================
@@ -3481,6 +3511,190 @@ function showInstallPrompt(){
 function dismissInstall(){
   localStorage.setItem('woblii-install-dismissed','1');
   document.querySelector('.install-prompt')?.remove();
+}
+
+// ================================================================
+// OPENING RITUAL LINES
+// ================================================================
+const RITUAL_LINES=[
+  "The day has not decided anything about you yet.",
+  "You brought yourself here. That is the first thing.",
+  "Whatever yesterday was, this is a different day.",
+  "The companions are here.",
+  "Nothing is required of you yet.",
+  "You are in a specific place. The ground is holding you.",
+  "This moment is separate from all the other moments.",
+  "You showed up. That already counts.",
+  "The day is still open.",
+  "Nothing from yesterday has to come in with you."
+];
+
+// Time-aware ritual lines
+function getRitualLine(){
+  if(HOUR>=2&&HOUR<5)return"The night is almost done. You made it through.";
+  if(HOUR>=5&&HOUR<7)return"Early. The day is very new. No rush.";
+  if(HOUR>=22)return"Late start. Still counts. Still here.";
+  const dow=DOW;
+  if(dow===1)return"Monday. Whatever that means for you today.";
+  if(dow===5)return"Friday. The week is nearly done.";
+  return rnd(RITUAL_LINES);
+}
+
+// ================================================================
+// COMPANION CLOSING LINES
+// ================================================================
+const CLOSING_LINES={
+  grumble:["The day is done. You can put it down now.","Hmph. You did what you could. That is enough.","Rest. Tomorrow is a different question."],
+  pebble:["Still here. Still okay. Rest now.","The day is complete. You can be still.","You gave what you had. That is everything."],
+  colin:["Day closed. Well done.","Sorted. Rest up.","That is the day. Sleep well."],
+  crunchy:["What a day! Rest up, you've earned it!","Brilliant effort today. Sleep well!","Day closed! Tomorrow we go again!"],
+  pip:["THE DAY IS DONE! REST NOW! YOU WERE AMAZING!","SLEEP! YOU NEED IT! TOMORROW IS GOING TO BE INCREDIBLE!","CLOSED! REST! I'M SO PROUD!"]
+};
+
+// ================================================================
+// ANIMATED COMPANION TEXT
+// ================================================================
+function animateCompanionText(type, msg, el){
+  if(!el)return;
+  el.innerHTML='';
+  if(type==='grumble'){
+    // Word by word, slow
+    const words=msg.split(/(\s+)/);
+    words.forEach((w,i)=>{
+      if(!w.trim()){el.innerHTML+=w;return;}
+      const span=document.createElement('span');
+      span.innerHTML=w;
+      span.style.animationDelay=`${0.3+i*0.12}s`;
+      span.className='';
+      el.appendChild(span);
+    });
+    el.className='comp-text-grumble';
+  } else if(type==='pip'){
+    el.innerHTML=msg;
+    el.className='comp-text-pip';
+    el.style.animationDelay='0.2s';
+    // Pip adds a second burst line after
+    setTimeout(()=>{
+      const second=document.createElement('div');
+      second.innerHTML='<br>';
+      const line2=document.createElement('span');
+      line2.style.cssText='display:block;animation:pipSlam .15s cubic-bezier(.34,2,.64,1) .6s both;opacity:0';
+      line2.innerHTML='&nbsp;';
+      el.parentElement.appendChild(line2);
+    },400);
+  } else if(type==='pebble'){
+    el.innerHTML=msg;
+    el.className='comp-text-pebble';
+    el.style.animationDelay='0.4s';
+    el.style.opacity='0';
+    setTimeout(()=>{el.style.opacity='';},50);
+  } else if(type==='colin'){
+    el.innerHTML=msg;
+    el.className='comp-text-colin';
+    el.style.animationDelay='0.1s';
+  } else if(type==='crunchy'){
+    // Bouncy characters
+    const chars=[...msg];
+    chars.forEach((ch,i)=>{
+      if(ch===' '){el.innerHTML+=' ';return;}
+      const span=document.createElement('span');
+      // Make ! bigger
+      span.innerHTML=ch==='!'?`<em>!</em>`:ch;
+      span.style.animationDelay=`${0.2+i*0.04}s`;
+      el.appendChild(span);
+    });
+    el.className='comp-text-crunchy';
+  } else {
+    el.innerHTML=msg;
+  }
+}
+
+// Override compCard to use animated text
+function compCardAnimated(type,pool){
+  const c=COMP_CFG[type];if(!c)return'';
+  const msgs=[...pool];
+  const custom=userPrefs?.companion_custom_msgs?.[type];
+  if(custom&&Math.random()<0.3)msgs.unshift(custom);
+  const msg=applyName(rnd(msgs));
+  const html=`<div class="companion-card ${c.cls}" id="companion-card">
+    <div class="companion-figure"><div class="${c.wrap}">${c.svg(c.sz)}</div><div class="companion-name-tag">${compName(type)}</div></div>
+    <div class="companion-bubble" id="companion-bubble"><p id="companion-text"></p></div>
+  </div>`;
+  // Animate after render
+  setTimeout(()=>{
+    const el=document.getElementById('companion-text');
+    if(el)animateCompanionText(type,msg,el);
+  },200);
+  return html;
+}
+
+// ================================================================
+// EVIDENCE WALL DEPTH — smart surfacing
+// ================================================================
+function getSmartEvidence(){
+  if(!evidenceItems||!evidenceItems.length)return null;
+  const state=todayData?.state||'steady';
+  const isHard=state==='flat'||state==='fragile';
+  const now=Date.now();
+  // Score each item
+  const scored=evidenceItems.map(item=>{
+    const age=now-new Date(item.created_at).getTime();
+    const daysSince=age/(1000*60*60*24);
+    let score=0;
+    // Older items that haven't been seen recently score higher
+    if(daysSince>30)score+=3;
+    else if(daysSince>7)score+=1;
+    // On hard days prefer items added on good days (we don't track this yet so random bonus)
+    if(isHard)score+=Math.random()*2;
+    // Small random element to keep it fresh
+    score+=Math.random();
+    return{...item,score};
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  return scored[0];
+}
+
+// ================================================================
+// LANGUAGE SHIFT
+// ================================================================
+function getLang(state){
+  return(state==='flat'||state==='fragile')?'soft':'normal';
+}
+function langWord(normal,soft,state){
+  const s=state||todayData?.state||'steady';
+  return(s==='flat'||s==='fragile')?soft:normal;
+}
+
+// Opening ritual display
+function showOpeningRitual(callback){
+  const line=getRitualLine();
+  const overlay=document.createElement('div');
+  overlay.className='ritual-screen';
+  overlay.innerHTML=`<div class="ritual-line">${line}</div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>{
+    overlay.style.transition='opacity 1s ease';
+    overlay.style.opacity='0';
+    setTimeout(()=>{overlay.remove();if(callback)callback();},1000);
+  },2200);
+}
+
+// Closing ritual display
+function showClosingRitual(comp,callback){
+  const lines=CLOSING_LINES[comp]||CLOSING_LINES.colin;
+  const line=rnd(lines);
+  const overlay=document.createElement('div');
+  overlay.className='closing-screen';
+  const c=COMP_CFG[comp];
+  overlay.innerHTML=`
+    <div style="filter:drop-shadow(0 0 20px ${c?.color||'#c9a84c'});margin-bottom:28px;opacity:.7">${c?.svg(60)||''}</div>
+    <div class="closing-line">${applyName(line)}</div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>{
+    overlay.style.transition='opacity 1.2s ease';
+    overlay.style.opacity='0';
+    setTimeout(()=>{overlay.remove();if(callback)callback();},1200);
+  },3500);
 }
 
 // ================================================================
