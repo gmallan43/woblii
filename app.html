@@ -776,8 +776,9 @@ let activeCompIntro='grumble';
 let screeningId='',screeningAnswers={},screeningResults={};
 let monthlyAssessments=[];
 let currentAssessmentType='',currentAssessmentAnswers={};
+let bodySignals=[];
 
-function freshToday(){return{date:TODAY,state:'',body:{},oneRealThing:'',ortDone:false,tasks:[],voltageBox:[],close:null,wot:'',dissociation:false,sensory:{},activationClose:'',sleepHours:null}}
+function freshToday(){return{date:TODAY,state:'',body:{},oneRealThing:'',ortDone:false,tasks:[],voltageBox:[],close:null,wot:'',dissociation:false,sensory:{},activationClose:'',sleepHours:null,openTime:null}}
 
 // ================================================================
 // SUPABASE
@@ -793,11 +794,19 @@ async function dbSaveToday(){
     tasks:todayData.tasks,voltage_box:todayData.voltageBox,close:todayData.close,
     wot:todayData.wot||'',dissociation:todayData.dissociation||false,
     sensory:todayData.sensory||{},activation_close:todayData.activationClose||'',
-    sleep_hours:todayData.sleepHours||null
+    sleep_hours:todayData.sleepHours||null,
+    open_time:todayData.openTime||null
   },{onConflict:'user_id,date'});
   syncing=false;setSyncDot(false);
 }
-async function dbLoadAllDays(){const{data}=await sb.from('daily_entries').select('date,state,body,ort_done,tasks,wot,dissociation,sensory,activation_close,sleep_hours').order('date',{ascending:false}).limit(90);return data||[]}
+async function dbLoadAllDays(){const{data}=await sb.from('daily_entries').select('date,state,body,ort_done,tasks,wot,dissociation,sensory,activation_close,sleep_hours,open_time').order('date',{ascending:false}).limit(90);return data||[]}
+async function dbSaveBodySignal(signal,state){
+  await sb.from('body_signals').insert({user_id:currentUser.id,signal,state:state||todayData?.state||''});
+}
+async function dbLoadBodySignals(){
+  const{data}=await sb.from('body_signals').select('*').order('created_at',{ascending:false}).limit(200);
+  return data||[];
+}
 async function dbLoadMonthlyAssessments(){const{data}=await sb.from('monthly_assessments').select('*').order('created_at',{ascending:false}).limit(24);return data||[]}
 async function dbSaveMonthlyAssessment(month,type,answers,score){
   await sb.from('monthly_assessments').upsert({user_id:currentUser.id,month,type,answers,score},{onConflict:'user_id,month,type'});
@@ -978,9 +987,9 @@ function generateInsights(days){
 // ================================================================
 async function loadUserData(){
   function safe(p,fb){return Promise.race([p.catch(()=>fb),new Promise(r=>setTimeout(()=>r(fb),6000))])}
-  const[row,ev,prefs,days,assessments]=await Promise.all([
+  const[row,ev,prefs,days,assessments,signals]=await Promise.all([
     safe(dbLoadToday(),null),safe(dbLoadEvidence(),[]),safe(dbLoadPrefs(),null),
-    safe(dbLoadAllDays(),[]),safe(dbLoadMonthlyAssessments(),[])
+    safe(dbLoadAllDays(),[]),safe(dbLoadMonthlyAssessments(),[]),safe(dbLoadBodySignals(),[])
   ]);
   todayData=row?{
     date:row.date,state:row.state||'',body:row.body||{},
@@ -988,10 +997,15 @@ async function loadUserData(){
     tasks:row.tasks||[],voltageBox:row.voltage_box||[],close:row.close||null,
     wot:row.wot||'',dissociation:row.dissociation||false,
     sensory:row.sensory||{},activationClose:row.activation_close||'',
-    sleepHours:row.sleep_hours||null
+    sleepHours:row.sleep_hours||null,openTime:row.open_time||null
   }:freshToday();
+  // Record open time if not already set today
+  if(!todayData.openTime){
+    todayData.openTime=new Date().toTimeString().slice(0,5);
+    scheduleSave();
+  }
   evidenceItems=ev||[];userPrefs=prefs||{};allDays=days||[];
-  monthlyAssessments=assessments||[];
+  monthlyAssessments=assessments||[];bodySignals=signals||[];
   if(userPrefs.libre_email)fetchGlucose().then(g=>{glucoseData=g}).catch(()=>{});
   checkDailyEmail().catch(()=>{});
   checkMonthlyAssessment();
@@ -1598,6 +1612,7 @@ function rDay(){
       </div>
       <div class="nav-acts">
         <button class="btn-icon" onclick="openMidday()" title="Mid-day check-in">☀</button>
+        <button class="btn-icon" onclick="openBodySignal()" title="Body signal">🫀</button>
         <button class="btn-icon" onclick="go('evidence')" title="Evidence Wall">✦</button>
         ${allDays.length>=7?`<button class="btn-icon" onclick="go('patterns')" title="Patterns">∿</button>`:''}
         <button class="btn-icon" onclick="gameState={};go('wobble-game')" title="Wobble game">🎮</button>
@@ -1609,6 +1624,7 @@ function rDay(){
       ${t.state==='lit-up'?`<div class="cban">⚡ Containment mode on. Nothing new becomes a commitment until it has rested 48 hours in the Voltage Box.</div>`:''}
       ${seasonal?`<div class="seasonal-banner">${seasonal}</div>`:''}
       ${glucoseBanner}
+      ${(()=>{const notice=getRelationshipNotice();return notice?`<div class="card-sm" style="border-color:var(--accent-dim);margin-bottom:14px;border-style:dashed"><p class="body-text" style="font-size:.82rem;font-style:italic;color:var(--text-soft)">${notice}</p></div>`:''})()}
       ${(t.body?.sleep==='poor'||t.body?.eaten==='no'||t.body?.meds==='no')?`<div class="card-sm" style="border-color:var(--teal-dim);margin-bottom:14px"><p class="body-text" style="font-size:.78rem">${t.body.sleep==='poor'?'⚠ Low sleep. ':''}${t.body.eaten==='no'?'⚠ Not eaten yet. ':''}${t.body.meds==='no'?'⚠ Medication missed yesterday.':''}</p></div>`:''}
       ${card}
       <div class="sec-label">${langWord('The one real thing','Your one intention',t.state)}</div>
@@ -2037,6 +2053,7 @@ function rNight(){
     ${nightComp?`<div style="max-width:380px;margin:0 auto 20px">${nightComp}</div>`:''}
     <p class="body-text" style="font-size:.8rem;opacity:.35;margin-bottom:20px">This is not the whole story.</p>
     <button class="btn btn-ghost btn-sm" onclick="go('crisis')" style="opacity:.4;margin-bottom:12px;width:100%;color:rgba(196,122,90,.6);border-color:rgba(196,122,90,.15)">🆘 Crisis page</button>
+    <button class="btn btn-ghost btn-sm" onclick="openBodySignal()" style="opacity:.35;margin-bottom:12px;width:100%;border-color:rgba(255,255,255,.07);color:rgba(255,255,255,.3)">🫀 How does your body feel?</button>
     <button class="btn btn-ghost btn-full" onclick="back()" style="opacity:.38;border-color:rgba(255,255,255,.07);color:rgba(255,255,255,.3)">Return to day</button>
   </div></div>`
 }
@@ -2754,7 +2771,9 @@ function generateInsightsEnhanced(days,assessments){
   const sensoryHard=recent.filter(d=>d.sensory?.overall==='overwhelm').length;
   if(sensoryHard>=3)extra.push(`Sensory overwhelm has appeared on <strong>${sensoryHard} days</strong> this month. Worth noting whether those days cluster around particular environments or times.`);
 
-  // Assessment trend
+  // Body signal patterns
+  const bsPattern=analyseBodySignals();
+  if(bsPattern)extra.push(bsPattern);
   if(assessments&&assessments.length>=2){
     const gadScores=assessments.filter(a=>a.type==='gad7').slice(0,3);
     const phqScores=assessments.filter(a=>a.type==='phq9').slice(0,3);
@@ -3695,6 +3714,187 @@ function showClosingRitual(comp,callback){
     overlay.style.opacity='0';
     setTimeout(()=>{overlay.remove();if(callback)callback();},1200);
   },3500);
+}
+
+// ================================================================
+// RELATIONSHIP LAYER — companion noticing
+// ================================================================
+function getRelationshipNotice(){
+  if(!allDays||allDays.length<5)return null;
+  const recent=allDays.slice(0,14);
+  const comp=STATES.find(s=>s.id===todayData.state)?.companion||'colin';
+  const n=userName();
+  const you=n?n:'';
+
+  // Consecutive hard days
+  const consHard=(() => {
+    let count=0;
+    for(const d of recent){
+      if(d.state==='flat'||d.state==='fragile')count++;
+      else break;
+    }
+    return count;
+  })();
+  if(consHard>=7){
+    const msgs={
+      grumble:`${you?you+'. ':''}${consHard} days. That is a long stretch. Not asking you to be better. Just want you to know I noticed.`,
+      pebble:`${consHard} days of carrying something heavy. Still here. That is not nothing.`,
+      colin:`${consHard} consecutive hard days. Worth acknowledging that.`,
+      crunchy:`${you?you+', ':''}that has been ${consHard} tough days. You have still shown up. That counts for a lot.`,
+      pip:`${consHard} HARD DAYS AND YOU ARE STILL HERE. That is EVERYTHING.`
+    };
+    return msgs[comp]||null;
+  }
+
+  // Steady streak
+  const consGood=(() => {
+    let count=0;
+    for(const d of recent){
+      if(d.state==='steady'||d.state==='energised'||d.state==='lit-up')count++;
+      else break;
+    }
+    return count;
+  })();
+  if(consGood>=5){
+    const msgs={
+      grumble:`${consGood} good days in a row. Hmph. Not bad.`,
+      pebble:`${consGood} steady days. Quietly significant.`,
+      colin:`${consGood} days of solid ground. That is worth noticing.`,
+      crunchy:`${consGood} GREAT DAYS IN A ROW${you?' '+you:''}! You are on a roll!`,
+      pip:`${consGood} DAYS OF ABSOLUTE YES! KEEP GOING!`
+    };
+    return msgs[comp]||null;
+  }
+
+  // Silent ORT completions — completing without filling in the box
+  const silentORT=recent.filter(d=>d.ort_done&&!d.one_real_thing).length;
+  if(silentORT>=4){
+    const msgs={
+      grumble:`You have been doing the thing without telling anyone. ${silentORT} times. I noticed.`,
+      pebble:`You have been completing your intention quietly. ${silentORT} times. That is its own kind of strength.`,
+      colin:`${silentORT} days of doing the thing without documenting it. Quietly reliable.`,
+      crunchy:`${you?you+', ':''}you have been smashing it silently! ${silentORT} times! Tell me about it sometime!`,
+      pip:`${silentORT} SILENT COMPLETIONS! YOU ARE A MYSTERY AND I LOVE IT!`
+    };
+    return msgs[comp]||null;
+  }
+
+  // Late opening pattern
+  const lateOpens=recent.filter(d=>d.open_time&&parseInt(d.open_time.split(':')[0])>=21).length;
+  if(lateOpens>=3){
+    const msgs={
+      grumble:`The evenings seem to be when you are here lately. ${lateOpens} nights in a row. I do not judge.`,
+      pebble:`The nights have been when you are opening Woblii. ${lateOpens} times. That pattern is worth noticing gently.`,
+      colin:`${lateOpens} late-night opens recently. Worth asking what the evenings are holding.`,
+      crunchy:`You are a night owl lately${you?' '+you:''}! ${lateOpens} evenings! The energy is different at night!`,
+      pip:`${lateOpens} NIGHT SESSIONS! THE NIGHT ENERGY IS REAL!`
+    };
+    return msgs[comp]||null;
+  }
+
+  // Return after absence with reflection
+  const gaps=allDays.reduce((acc,d,i)=>{
+    if(i===0)return acc;
+    const prev=allDays[i-1];
+    const gap=Math.floor((new Date(prev.date)-new Date(d.date))/(86400000));
+    if(gap>=3)acc.push(gap);
+    return acc;
+  },[]);
+  if(gaps.length>=2){
+    const msgs={
+      grumble:`You keep coming back. ${gaps.length} times after being away. That is not nothing.`,
+      pebble:`Returning is hard. You have done it ${gaps.length} times. That is the whole skill.`,
+      colin:`${gaps.length} returns after absence. Consistent in the long run. That is what matters.`,
+      crunchy:`${gaps.length} COMEBACKS${you?' '+you:''}! THE COMEBACK KID!`,
+      pip:`${gaps.length} RETURNS! YOU KEEP COMING BACK! THAT IS EVERYTHING!`
+    };
+    return msgs[comp]||null;
+  }
+
+  return null;
+}
+
+// ================================================================
+// BODY SIGNAL JOURNAL
+// ================================================================
+let bodySignalModalOpen=false;
+
+function openBodySignal(){
+  bodySignalModalOpen=true;
+  const modal=document.getElementById('midday-modal');
+  modal.innerHTML=rBodySignalSheet();
+}
+
+function rBodySignalSheet(){
+  // Show recent signals for context
+  const recent=bodySignals.slice(0,5);
+  const recentHTML=recent.length?recent.map(s=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:.75rem;color:var(--text-muted);flex-shrink:0">${s.state||'·'}</span>
+      <span style="font-size:.82rem;color:var(--text-soft)">${s.signal}</span>
+    </div>`).join(''):'';
+
+  // Body signal patterns
+  const patterns=analyseBodySignals();
+  const patternHTML=patterns?`<div class="card-sm" style="margin-bottom:12px;border-color:var(--teal-dim)"><p style="font-size:.78rem;color:var(--teal);line-height:1.6">${patterns}</p></div>`:'';
+
+  return`<div class="midday-modal" onclick="if(event.target===this)closeBodySignal()">
+    <div class="midday-sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div class="heading" style="font-size:1.1rem">How does your <em>body</em> feel?</div>
+          <p class="muted" style="font-size:.72rem">Just notice. No right answer.</p>
+        </div>
+        <button class="btn-icon" onclick="closeBodySignal()">×</button>
+      </div>
+      ${patternHTML}
+      <textarea id="body-signal-input" placeholder="Tight chest. Jaw. Restless legs. Heavy. Buzzing. Numb. Anything physical you notice right now..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-b);font-size:.88rem;padding:12px;outline:none;resize:none;line-height:1.65;min-height:90px;margin-bottom:12px;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent-dim)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <button class="btn btn-primary btn-full" onclick="saveBodySignal()">Note this</button>
+      ${recent.length?`<div style="margin-top:14px"><p class="label" style="margin-bottom:6px">Recent signals</p>${recentHTML}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function analyseBodySignals(){
+  if(bodySignals.length<5)return null;
+  // Find words that appear before hard days
+  const hardDayDates=allDays.filter(d=>d.state==='flat'||d.state==='fragile').map(d=>d.date);
+  if(!hardDayDates.length)return null;
+
+  // Get signals from 1-2 days before hard days
+  const precursorSignals=bodySignals.filter(s=>{
+    const signalDate=s.created_at?.slice(0,10);
+    return hardDayDates.some(hd=>{
+      const diff=Math.floor((new Date(hd)-new Date(signalDate))/(86400000));
+      return diff>=0&&diff<=2;
+    });
+  });
+
+  if(precursorSignals.length<3)return null;
+
+  // Find most common words in precursor signals
+  const words=precursorSignals.flatMap(s=>s.signal.toLowerCase().split(/\s+/))
+    .filter(w=>w.length>3&&!['with','that','this','have','been','feel','feeling','really','just','very'].includes(w));
+  const freq={};
+  words.forEach(w=>{freq[w]=(freq[w]||0)+1});
+  const topWord=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];
+  if(topWord&&topWord[1]>=2){
+    return`You have mentioned <strong>${topWord[0]}</strong> in your body notes before ${topWord[1]} of your harder days. Worth paying attention to when that comes up.`;
+  }
+  return null;
+}
+
+async function saveBodySignal(){
+  const text=document.getElementById('body-signal-input')?.value?.trim();
+  if(!text){toast('What does your body feel?');return}
+  await dbSaveBodySignal(text,todayData?.state||'');
+  bodySignals.unshift({signal:text,state:todayData?.state||'',created_at:new Date().toISOString()});
+  toast('Noted. Your body knows things.');
+  closeBodySignal();
+}
+function closeBodySignal(){
+  document.getElementById('midday-modal').innerHTML='';
+  bodySignalModalOpen=false;
 }
 
 // ================================================================
