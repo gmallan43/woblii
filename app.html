@@ -3342,9 +3342,15 @@ function renderTaskPills(){
   const container=document.getElementById('task-pills');
   if(!container||!ortActiveCat)return;
   const items=ORT_SUGGESTIONS[ortActiveCat]?.items||[];
-  container.innerHTML=items.map(s=>
-    `<div class="ort-pill" onclick="pickTaskSuggestion(${JSON.stringify(s)})">${s}</div>`
+  container.innerHTML=items.map((s,i)=>
+    `<div class="ort-pill" data-task-idx="${i}" data-cat="${ortActiveCat}" onclick="pickTaskSuggestionIdx(this)">${s}</div>`
   ).join('');
+}
+function pickTaskSuggestionIdx(el){
+  const cat=el.getAttribute('data-cat');
+  const idx=parseInt(el.getAttribute('data-task-idx'));
+  const text=ORT_SUGGESTIONS[cat]?.items[idx];
+  if(text)pickTaskSuggestion(text);
 }
 function pickTaskSuggestion(text){
   // Fill the input
@@ -3397,9 +3403,15 @@ function renderOrtPills(){
   const container=document.getElementById('ort-pills');
   if(!container||!ortActiveCat)return;
   const items=ORT_SUGGESTIONS[ortActiveCat]?.items||[];
-  container.innerHTML=items.map(s=>
-    `<div class="ort-pill" onclick="pickOrtSuggestion(${JSON.stringify(s)})">${s}</div>`
+  container.innerHTML=items.map((s,i)=>
+    `<div class="ort-pill" data-task-idx="${i}" data-cat="${ortActiveCat}" onclick="pickOrtSuggestionIdx(this)">${s}</div>`
   ).join('');
+}
+function pickOrtSuggestionIdx(el){
+  const cat=el.getAttribute('data-cat');
+  const idx=parseInt(el.getAttribute('data-task-idx'));
+  const text=ORT_SUGGESTIONS[cat]?.items[idx];
+  if(text)pickOrtSuggestion(text);
 }
 
 function pickOrtSuggestion(text){
